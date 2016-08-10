@@ -27,6 +27,6 @@
     "start": "NODE_ENV=prod ENV_NAME=123 LOG_LEVEL=TRACE node index.js"
   },
   "config": {
-    "upload-path": "/lamda-proxy"
+    "upload-path": "/lambda-proxy"
   }
 }
