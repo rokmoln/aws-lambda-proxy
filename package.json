@@ -1,0 +1,24 @@
+{
+  "private": true,
+  "name": "tfc-server",
+  "version": "0.0.1",
+  "description": "TFC Server",
+  "dependencies": {
+    "aws-sdk": "*",
+    "babel-plugin-transform-class-properties": "*",
+    "babel-preset-es2015-node": "*",
+    "babel-register": "*",
+    "body-parser": "*",
+    "bunyan": "*",
+    "express": "*",
+    "lodash": "*"
+  },
+  "files": [
+    "index.js",
+    "node_modules",
+    "src"
+  ],
+  "scripts": {
+    "start": "NODE_ENV=prod ENV_NAME=123 LOG_LEVEL=TRACE node index.js"
+  }
+}
