@@ -7,6 +7,9 @@ let awsLambda = new Lambda({apiVersion: '2015-03-31'});
 
 exports.create = function(options) {
   let app = express();
+  // let hashedEnv =
+  //       Buffer.from(process.env.ENV_NAME).toString('base64').slice(0, -1);
+  let hashedEnv = 'Z2l0LW5ldy1iYWNrZW5';
 
   app.disable('x-powered-by');
   app.disable('etag');
@@ -16,6 +19,10 @@ exports.create = function(options) {
   app.env = options.env;
   app.log = options.log;
   app.loadLambdas = _.curry(exports.loadLambdas)(app);
+
+  app.get(`/health.${hashedEnv}`, function(_req, res, _next) {
+    res.sendStatus(200);
+  });
 
   app.use(function(err, _req, res, _next) {
     if (err == null) {
