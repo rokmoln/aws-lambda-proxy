@@ -1,7 +1,7 @@
 // FIXME
 let apexPath = '../../../apex';
 let lambdas = [
-    'api-screenshare-sessions'
+  'api-screenshare-sessions'
 ];
 
 /* eslint global-require:off */
@@ -19,60 +19,60 @@ let NODE_PATH = process.env.NODE_PATH || '';
 // EASY LOADING OF API LAMBDAS
 
 (function() {
-    [`${apexPath}/functions`].forEach(function(lambdasPath) {
-        if (NODE_PATH.indexOf(lambdasPath) > -1) {
-            return;
-        }
+  [`${apexPath}/functions`].forEach(function(lambdasPath) {
+    if (NODE_PATH.indexOf(lambdasPath) > -1) {
+      return;
+    }
 
-        NODE_PATH = path.join(__dirname, lambdasPath) +
-            (NODE_PATH ? `:${NODE_PATH}` : '');
-    });
-    process.env.NODE_PATH = NODE_PATH;
-    require('module')._initPaths();
+    NODE_PATH = path.join(__dirname, lambdasPath) +
+      (NODE_PATH ? `:${NODE_PATH}` : '');
+  });
+  process.env.NODE_PATH = NODE_PATH;
+  require('module')._initPaths();
 })();
 
 // MAIN
 
 if (!isProd) {
-    _.defaults(process.env, {
-        DEBUG_HOST: 'localhost',
-        DEBUG_PORT: '9999',
-        NODE_HEAPDUMP_OPTIONS: 'nosignal'
-    });
+  _.defaults(process.env, {
+    DEBUG_HOST: 'localhost',
+    DEBUG_PORT: '9999',
+    NODE_HEAPDUMP_OPTIONS: 'nosignal'
+  });
 
-    Error.stackTraceLimit = Infinity;
-    // require('longjohn').async_trace_limit = -1;
+  Error.stackTraceLimit = Infinity;
+  // require('longjohn').async_trace_limit = -1;
 }
 
 _.defaults(process.env, {
-    PORT: '8081',
-    DEBUG_HOST: '',
-    DEBUG_PORT: '',
-    NODE_ENV: '',
-    NODE_PATH: ''
+  PORT: '8081',
+  DEBUG_HOST: '',
+  DEBUG_PORT: '',
+  NODE_ENV: '',
+  NODE_PATH: ''
 });
 
 lambdas = _.map(lambdas, function(name) {
-    let pkg = require(path.join(name, 'package.json'));
-    return {
-        name,
-        pkg
-    };
+  let pkg = require(path.join(name, 'package.json'));
+  return {
+    name,
+    pkg
+  };
 });
 
 module.exports = {
-    address: '127.0.0.1',
-    fork_count: isProd ? os.cpus().length : 0,
-    heartbeat: {
-        interval: 15, // minutes, 0 to disable
-        mem_threshold_rss: undefined // MB
-    },
-    is_prod: isProd,
-    lambdas,
-    log: {
-        level: process.env.LOG_LEVEL || 'INFO',
-        to_dir: isProd ? undefined : '.'
-    },
-    port: process.env.PORT,
-    project
+  address: '127.0.0.1',
+  fork_count: isProd ? os.cpus().length : 0,
+  heartbeat: {
+    interval: 15, // minutes, 0 to disable
+    mem_threshold_rss: undefined // MB
+  },
+  is_prod: isProd,
+  lambdas,
+  log: {
+    level: process.env.LOG_LEVEL || 'INFO',
+    to_dir: isProd ? undefined : '.'
+  },
+  port: process.env.PORT,
+  project
 };
