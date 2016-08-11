@@ -9,6 +9,9 @@ APEX_FUNS := $(shell $(FIND_Q) $(APEX_TOP)/functions -mindepth 1 -maxdepth 1 -ty
 package.dir/VERSION:
 	$(MAKE) -f "$(TOP)/support/mk/Makefile.pkg.mk" $@
 	for f in $(APEX_FUNS); do \
-		$(MKDIR) ./apex/functions/$${f}; \
-		cp $(APEX_TOP)/functions/$${f}/package.json ./apex/functions/$${f}/package.json; \
+		$(MKDIR) package.dir/apex/functions/$${f}; \
+		cp $(APEX_TOP)/functions/$${f}/package.json package.dir/apex/functions/$${f}/package.json; \
 	done
+
+start: ## Start the LambdaProxy server
+	ENV_NAME=$(ENV_NAME) node ./index.js

@@ -6,24 +6,28 @@ import os from 'os';
 import path from 'path';
 
 let isProd = /^prod/.test(process.env.NODE_ENV);
-let apexPath = isProd ? [__dirname, '..', 'apex'] : ['..', '..', '..', 'apex'];
+let apexPath = [__dirname].concat(isProd ?
+                                  ['..', 'apex'] :
+                                  ['..', '..', '..', 'apex']
+                                 );
 apexPath = path.join(...apexPath);
+let apexFunPath = path.join(apexPath, 'functions');
+console.log(apexFunPath);
 let projectPath = path.join(apexPath, `project.${process.env.ENV_NAME}.json`);
 let project = isProd ? {name: process.env.ENV_NAME} : require(projectPath);
-let lambdas = fs.readdirSync(path.join(apexPath, 'functions'));
+let lambdas = fs.readdirSync(apexFunPath);
 
 let NODE_PATH = process.env.NODE_PATH || '';
 
 // EASY LOADING OF API LAMBDAS
 
 (function() {
-  [`${apexPath}/functions`].forEach(function(lambdasPath) {
-    if (NODE_PATH.indexOf(lambdasPath) > -1) {
+  [apexFunPath].forEach(function(extraPath) {
+    if (NODE_PATH.indexOf(extraPath) > -1) {
       return;
     }
 
-    NODE_PATH = path.join(__dirname, lambdasPath) +
-      (NODE_PATH ? `:${NODE_PATH}` : '');
+    NODE_PATH = extraPath + (NODE_PATH ? `:${NODE_PATH}` : '');
   });
   process.env.NODE_PATH = NODE_PATH;
   require('module')._initPaths();

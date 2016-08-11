@@ -15,7 +15,7 @@
     "src"
   ],
   "scripts": {
-    "start": "node index.js"
+    "start": "make start"
   },
   "config": {
     "upload-path": "/lambda-proxy"
