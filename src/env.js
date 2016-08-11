@@ -11,6 +11,8 @@ import os from 'os';
 import path from 'path';
 
 let isProd = /^prod/.test(process.env.NODE_ENV);
+let projectPath = path.join(apexPath, `project.${process.env.ENV_NAME}.json`);
+let project = isProd ? {name: process.env.ENV_NAME} : require(projectPath);
 
 let NODE_PATH = process.env.NODE_PATH || '';
 
@@ -71,5 +73,6 @@ module.exports = {
     level: process.env.LOG_LEVEL || 'INFO',
     toDir: isProd ? undefined : '.'
   },
-  port: process.env.PORT
+  port: process.env.PORT,
+  project
 };
