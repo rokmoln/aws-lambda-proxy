@@ -14,4 +14,4 @@ package.dir/VERSION:
 	done
 
 start: ## Start the LambdaProxy server
-	ENV_NAME=$(ENV_NAME) node ./index.js
+	ENV_NAME=$(ENV_NAME) node ./index.js | ./node_modules/bunyan/bin/bunyan
