@@ -1,18 +1,19 @@
 /* eslint global-require:off, no-process-exit:off */
 
-import _ from 'lodash';
-import bunyan from 'bunyan';
 import cluster from 'cluster';
-import env from './env';
-import expressApp from './express-app';
-
 import http from 'http';
 import os from 'os';
 import path from 'path';
+
+import _ from 'lodash';
+import bunyan from 'bunyan';
+
 import pkg from '../package.json';
+import env from './env';
+import expressApp from './express-app';
 
 let heapdump;
-if (env.heartbeat.mem_threshold_rss && env.log.to_dir) {
+if (env.heartbeat.memThresholdRss && env.log.toDir) {
   heapdump = require('heapdump');
 }
 let workerId = cluster.worker && cluster.worker.id || 'M';
@@ -28,11 +29,11 @@ let logStreams = [{
   level: 'TRACE'
 }];
 
-if (env.log.to_dir) {
+if (env.log.toDir) {
   logStreams.push({
     name: 'default',
     type: 'rotating-file',
-    path: path.join(env.log.to_dir, `${pkg.name}.log`),
+    path: path.join(env.log.toDir, `${pkg.name}.log`),
     period: '1d',
     count: 7,
     level: env.log.level
@@ -48,8 +49,8 @@ let log = bunyan.createLogger({
 
 if (!cluster.isMaster) {
   log = log.child({
-    tag_server_worker: true,
-    worker_id: workerId
+    tagServerWorker: true,
+    workerId
   });
 }
 
@@ -60,11 +61,11 @@ let writeHeapSnapshot = function(logObj) {
   logObj.heapsnapshot = {
     filename
   };
-  heapdump.writeSnapshot(`${env.log.to_dir}/${filename}`);
+  heapdump.writeSnapshot(`${env.log.toDir}/${filename}`);
 };
 
 let maybeWriteHeapSnapshot = function(logObj) {
-  let thresholdRss = env.heartbeat.mem_threshold_rss;
+  let thresholdRss = env.heartbeat.memThresholdRss;
   let currentRss;
   currentRss = logObj.process.memoryUsage.rss / (1024 * 1024);
   if (currentRss <= thresholdRss) {
@@ -76,7 +77,7 @@ let maybeWriteHeapSnapshot = function(logObj) {
     thresholdRss,
     filename
   };
-  heapdump.writeSnapshot(`${env.log.to_dir}/${filename}`);
+  heapdump.writeSnapshot(`${env.log.toDir}/${filename}`);
   thresholdRss = thresholdRss + 25;
   return true;
 };
@@ -157,7 +158,7 @@ let mainWorker = function() {
   });
 
   app.loadLambdas(_.map(env.lambdas, function({name, pkg}) {
-    let isProd = env.is_prod || pkg.config.is_prod;
+    let isProd = env.isProd || pkg.config.isProd;
     return {
       name,
       pkg,
@@ -203,9 +204,9 @@ let onSimpleEvent = function(event, worker) {
   }
 
   log[level]({
-    tag_server_worker: true,
+    tagServerWorker: true,
     tag_server_event: event,
-    worker_id: worker.id
+    workerId: worker.id
   }, `Worker ${event}${args}`);
 };
 
@@ -216,7 +217,7 @@ let mainMaster = function() {
   };
 
   // Exit when pipe is closed
-  if (env.is_prod) {
+  if (env.isProd) {
     process.stdin.resume();
     process.stdin.on('close', function() {
       _.curry(onSimpleEvent)('stdin_close')(arguments);
@@ -242,13 +243,13 @@ let mainMaster = function() {
       let args = ` [${newWorker.id}]`;
 
       log.info({
-        tag_server_worker: true,
+        tagServerWorker: true,
         tag_server_event: event,
-        worker_id: worker.id
+        workerId: worker.id
       }, `Worker ${event}${args}`);
     });
 
-  if (env.is_prod) {
+  if (env.isProd) {
     startupLog.process = {
       arch: process.arch,
       env: process.env,
@@ -277,7 +278,7 @@ let mainMaster = function() {
 
   log.info(startupLog, 'Starting');
 
-  for (let i = 0; i < env.fork_count; i++) {
+  for (let i = 0; i < env.forkCount; i++) {
     cluster.fork();
   }
 };
@@ -290,7 +291,7 @@ let run = function() {
     console.log(`PORT=${env.port}`);
     console.log('---');
 
-    if (!env.is_prod) {
+    if (!env.isProd) {
       console.log(`Started server on http://${env.address}:${env.port}`);
       console.log('Press CTRL-C to stop');
       console.log(`To debug, run: kill -SIGUSR1 ${process.pid}`);
@@ -298,7 +299,7 @@ let run = function() {
     }
 
     mainMaster();
-    if (env.fork_count > 0) {
+    if (env.forkCount > 0) {
       return;
     }
   }

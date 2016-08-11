@@ -10,7 +10,7 @@ import _ from 'lodash';
 import os from 'os';
 import path from 'path';
 
-let isProd = _.includes(['prod', 'production'], process.env.NODE_ENV);
+let isProd = /^prod/.test(process.env.NODE_ENV);
 let projectPath = path.join(apexPath, `project.${process.env.ENV_NAME}.json`);
 let project = isProd ? {name: process.env.ENV_NAME} : require(projectPath);
 
@@ -62,16 +62,16 @@ lambdas = _.map(lambdas, function(name) {
 
 module.exports = {
   address: '127.0.0.1',
-  fork_count: isProd ? os.cpus().length : 0,
+  forkCount: isProd ? os.cpus().length : 0,
   heartbeat: {
     interval: 15, // minutes, 0 to disable
-    mem_threshold_rss: undefined // MB
+    memThresholdRss: undefined // MB
   },
-  is_prod: isProd,
+  isProd,
   lambdas,
   log: {
     level: process.env.LOG_LEVEL || 'INFO',
-    to_dir: isProd ? undefined : '.'
+    toDir: isProd ? undefined : '.'
   },
   port: process.env.PORT,
   project
