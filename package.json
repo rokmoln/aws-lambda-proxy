@@ -15,7 +15,7 @@
     "src"
   ],
   "scripts": {
-    "start": "make start"
+    "start": "node ./index.js | ./node_modules/bunyan/bin/bunyan"
   },
   "config": {
     "upload-path": "/lambda-proxy"
