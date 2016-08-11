@@ -90,7 +90,7 @@ exports.makeLambdaProxyHandle = function(app, name) {
     });
 
     awsLambda.invoke({
-      FunctionName: `${app.env.project.name}-${name}`,
+      FunctionName: `${process.env.ENV_NAME}-${name}`,
       ClientContext: ctx.clientContext,
       InvocationType: 'RequestResponse',
       LogType: 'None',
