@@ -16,7 +16,7 @@
     "src"
   ],
   "scripts": {
-    "start": "NODE_ENV=prod ENV_NAME=123 LOG_LEVEL=TRACE node index.js"
+    "start": "node index.js"
   },
   "config": {
     "upload-path": "/lambda-proxy"
