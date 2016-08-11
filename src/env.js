@@ -1,18 +1,16 @@
-// FIXME
-let apexPath = '../../../apex';
-let lambdas = [
-  'api-screenshare-sessions'
-];
-
 /* eslint global-require:off */
 
 import _ from 'lodash';
+import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
 let isProd = /^prod/.test(process.env.NODE_ENV);
+let apexPath = isProd ? [__dirname, '..', 'apex'] : ['..', '..', '..', 'apex'];
+apexPath = path.join(...apexPath);
 let projectPath = path.join(apexPath, `project.${process.env.ENV_NAME}.json`);
 let project = isProd ? {name: process.env.ENV_NAME} : require(projectPath);
+let lambdas = fs.readdirSync(path.join(apexPath, 'functions'));
 
 let NODE_PATH = process.env.NODE_PATH || '';
 
