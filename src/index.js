@@ -10,7 +10,7 @@ import bunyan from 'bunyan';
 
 import pkg from '../package.json';
 import env from './env';
-import expressApp from './express-app';
+import * as expressApp from './express-app';
 
 let heapdump;
 if (env.heartbeat.memThresholdRss && env.log.toDir) {

@@ -5,7 +5,31 @@ import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
+if (!process.env.ENV_NAME) {
+  throw new Error('process.env.ENV_NAME is undefined.');
+}
+
 let isProd = /^prod/.test(process.env.NODE_ENV);
+
+_.defaults(process.env, {
+  PORT: '8081',
+  DEBUG_HOST: '',
+  DEBUG_PORT: '',
+  LOG_LEVEL: 'INFO',
+  NODE_ENV: '',
+  NODE_PATH: ''
+});
+
+if (!isProd) {
+  _.defaults(process.env, {
+    DEBUG_HOST: 'localhost',
+    DEBUG_PORT: '9999',
+    NODE_HEAPDUMP_OPTIONS: 'nosignal'
+  });
+
+  Error.stackTraceLimit = Infinity;
+}
+
 let apexPath = [__dirname].concat(isProd ?
                                   ['..', 'apex'] :
                                   ['..', '..', '..', 'apex']
@@ -35,25 +59,6 @@ let NODE_PATH = process.env.NODE_PATH || '';
 
 // MAIN
 
-if (!isProd) {
-  _.defaults(process.env, {
-    DEBUG_HOST: 'localhost',
-    DEBUG_PORT: '9999',
-    NODE_HEAPDUMP_OPTIONS: 'nosignal'
-  });
-
-  Error.stackTraceLimit = Infinity;
-  // require('longjohn').async_trace_limit = -1;
-}
-
-_.defaults(process.env, {
-  PORT: '8081',
-  DEBUG_HOST: '',
-  DEBUG_PORT: '',
-  NODE_ENV: '',
-  NODE_PATH: ''
-});
-
 lambdas = _.map(lambdas, function(name) {
   let pkg = require(path.join(name, 'package.json'));
   return {
@@ -72,7 +77,7 @@ module.exports = {
   isProd,
   lambdas,
   log: {
-    level: process.env.LOG_LEVEL || 'INFO',
+    level: process.env.LOG_LEVEL,
     toDir: isProd ? undefined : '.'
   },
   port: process.env.PORT,

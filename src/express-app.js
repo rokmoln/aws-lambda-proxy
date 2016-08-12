@@ -42,7 +42,7 @@ export let loadLambdas = function(app, lambdas) {
   _.each(lambdas, function({name, pkg, handle}) {
     _.each((pkg.config['aws-lambda'] || {}).locations, function(location) {
       let locationRE = new RegExp(`^${location}$`);
-      let functionName = `${process.env.ENV_NAME || 'LOCAL'}-${name}`;
+      let functionName = `${process.env.ENV_NAME}-${name}`;
       let ctx = {
         functionName,
         functionVersion: '$LOCAL',
