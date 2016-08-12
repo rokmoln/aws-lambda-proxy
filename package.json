@@ -10,6 +10,7 @@
     "lodash": "*"
   },
   "files": [
+    "apex",
     "index.js",
     "node_modules",
     "src"
