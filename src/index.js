@@ -103,7 +103,7 @@ let onUncaughtException = function(err) {
     console.error(e);
   }
 
-  if (cluster.isMaster) {
+  if (cluster.isMaster || !httpServer) {
     process.exit(1);
   } else {
     httpServer.close(function() {
@@ -113,6 +113,7 @@ let onUncaughtException = function(err) {
       log.error('HTTP server is stalling upon closing down. Forcefully terminating.'); // eslint-disable-line max-len
       process.exit(1);
     });
+    return;
   }
 };
 
