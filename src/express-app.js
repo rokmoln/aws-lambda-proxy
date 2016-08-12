@@ -7,8 +7,11 @@ let awsLambda = new Lambda({apiVersion: '2015-03-31'});
 
 export let create = function(options) {
   let app = express();
+  // maintain Node.js v4 compatibility
+  // let hashedEnv =
+  //   Buffer.from(process.env.ENV_NAME).toString('base64').slice(0, -1);
   let hashedEnv =
-    Buffer.from(process.env.ENV_NAME).toString('base64').slice(0, -1);
+    new Buffer(process.env.ENV_NAME).toString('base64').slice(0, -1);
 
   app.disable('x-powered-by');
   app.disable('etag');
