@@ -5,7 +5,7 @@ import {Lambda} from 'aws-sdk';
 
 let awsLambda = new Lambda({apiVersion: '2015-03-31'});
 
-exports.create = function(options) {
+export let create = function(options) {
   let app = express();
   let hashedEnv =
     Buffer.from(process.env.ENV_NAME).toString('base64').slice(0, -1);
@@ -35,7 +35,7 @@ exports.create = function(options) {
   return app;
 };
 
-exports.loadLambdas = function(app, lambdas) {
+export let loadLambdas = function(app, lambdas) {
   let locations = [];
   let arnPrefix = 'arn:aws:lambda:zz-central-1:000000000000:function';
 
@@ -63,7 +63,7 @@ exports.loadLambdas = function(app, lambdas) {
   });
 };
 
-exports.middleware = function(ctx, handle) {
+export let middleware = function(ctx, handle) {
   return function(req, res, _next) {
     handle({
       method: req.method,
@@ -82,7 +82,7 @@ exports.middleware = function(ctx, handle) {
   };
 };
 
-exports.makeLambdaProxyHandle = function(app, name) {
+export let makeLambdaProxyHandle = function(app, name) {
   return function(e, ctx = {}, cb = _.noop) {
     app.log.trace({
       tag_lambda: 'request',
