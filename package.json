@@ -4,6 +4,7 @@
   "version": "0.0.1",
   "description": "Lambda Proxy",
   "dependencies": {
+    "aws-sdk": "*",
     "body-parser": "*",
     "bunyan": "*",
     "express": "*",
