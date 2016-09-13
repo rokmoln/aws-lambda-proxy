@@ -6,10 +6,19 @@ APEX_FUNS := $(shell $(FIND_Q) $(APEX_TOP)/functions -mindepth 1 -maxdepth 1 -ty
 
 # ------------------------------------------------------------------------------
 
+.PHONY: build
+build: apex ## Build.
+
+
+apex:
+	ln -snf $(TOP)/apex apex
+
+
 package.dir/VERSION:
 	$(MAKE) -f "$(TOP)/support/mk/Makefile.pkg.mk" $@
 	cd package.dir && \
 		$(CAT) "package.json" | $(JSON) -e "delete this.dependencies" | $(SPONGE) "package.json"
+	$(RM) package.dir/apex
 	for f in $(APEX_FUNS); do \
 		$(MKDIR) package.dir/apex/functions/$${f}; \
 		cp $(APEX_TOP)/functions/$${f}/package.json package.dir/apex/functions/$${f}/package.json; \

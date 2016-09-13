@@ -159,7 +159,10 @@ let mainWorker = function() {
   });
 
   app.loadLambdas(_.map(env.lambdas, function({name, pkg}) {
-    let isProd = env.isProd || pkg.config.isProd;
+    let isProd =
+          (pkg.config.isProd == null) ?
+          env.isProd :
+          pkg.config.isProd;
     return {
       name,
       pkg,
