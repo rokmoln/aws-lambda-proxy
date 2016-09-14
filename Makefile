@@ -4,6 +4,10 @@ include $(TOP)/support/mk/Makefile.pkg.mk
 APEX_TOP := $(TOP)/apex
 APEX_FUNS := $(shell $(FIND_Q) $(APEX_TOP)/functions -mindepth 1 -maxdepth 1 -type d -printf "%f\n")
 
+export ENV_NAME
+export API_BASE_URL
+export WEB_BASE_URL
+
 # ------------------------------------------------------------------------------
 
 .PHONY: build
@@ -26,8 +30,8 @@ package.dir/VERSION:
 
 
 start: ## Start the LambdaProxy server
-	ENV_NAME=$(ENV_NAME) node ./index.js | ./node_modules/bunyan/bin/bunyan
+	node ./index.js | ./node_modules/bunyan/bin/bunyan
 
 
 debug: ## Start the LambdaProxy server in debug mode
-	ENV_NAME=$(ENV_NAME) node-debug ./index.js | ./node_modules/bunyan/bin/bunyan
+	node-debug ./index.js | ./node_modules/bunyan/bin/bunyan

@@ -173,12 +173,14 @@ let mainWorker = function() {
           require(name).handle
       };
     }),
-    clientContext: _.pick(process.env, [
-      'ENV_NAME',
-      'API_BASE_URL',
-      'WEB_BASE_URL',
-      'LOG_LEVEL'
-    ])
+    clientContext: {
+      env: _.pick(process.env, [
+        'ENV_NAME',
+        'API_BASE_URL',
+        'WEB_BASE_URL',
+        'LOG_LEVEL'
+      ])
+    }
   });
 
   http.globalAgent.maxSockets = Infinity;
