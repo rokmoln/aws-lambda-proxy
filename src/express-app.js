@@ -25,7 +25,13 @@ export let create = function(options) {
     res.sendStatus(200);
   });
 
-  app.loadLambdas = _.curry(exports.loadLambdas)(app);
+  app.loadLambdas = function({lambdas, clientContext}) {
+    return exports.loadLambdas({
+      app,
+      lambdas,
+      clientContext
+    });
+  };
 
   app.use(function(err, _req, res, _next) {
     if (err == null) {
@@ -38,7 +44,7 @@ export let create = function(options) {
   return app;
 };
 
-export let loadLambdas = function(app, lambdas) {
+export let loadLambdas = function({app, lambdas, clientContext}) {
   let locations = [];
   let arnPrefix = 'arn:aws:lambda:zz-central-1:000000000000:function';
 
@@ -49,7 +55,8 @@ export let loadLambdas = function(app, lambdas) {
       let ctx = {
         functionName,
         functionVersion: '$LOCAL',
-        invokedFunctionArn: `${arnPrefix}:${functionName}:$LOCAL`
+        invokedFunctionArn: `${arnPrefix}:${functionName}:$LOCAL`,
+        clientContext
       };
       locations.push({
         locationRE,

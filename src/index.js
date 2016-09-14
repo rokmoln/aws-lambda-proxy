@@ -151,6 +151,7 @@ let main = function() {
 
 let mainWorker = function() {
   main();
+
   let app = expressApp.create({
     address: env.address,
     port: env.port,
@@ -158,19 +159,27 @@ let mainWorker = function() {
     log
   });
 
-  app.loadLambdas(_.map(env.lambdas, function({name, pkg}) {
-    let isProd =
-          (pkg.config.isProd == null) ?
-          env.isProd :
-          pkg.config.isProd;
-    return {
-      name,
-      pkg,
-      handle: isProd ?
-        expressApp.makeLambdaProxyHandle(app, name) :
-        require(name).handle
-    };
-  }));
+  app.loadLambdas({
+    lambdas: _.map(env.lambdas, function({name, pkg}) {
+      let isProd =
+            (pkg.config.isProd == null) ?
+            env.isProd :
+            pkg.config.isProd;
+      return {
+        name,
+        pkg,
+        handle: isProd ?
+          expressApp.makeLambdaProxyHandle(app, name) :
+          require(name).handle
+      };
+    }),
+    clientContext: _.pick(process.env, [
+      'ENV_NAME',
+      'API_BASE_URL',
+      'WEB_BASE_URL',
+      'LOG_LEVEL'
+    ])
+  });
 
   http.globalAgent.maxSockets = Infinity;
   httpServer = http.createServer(app);
