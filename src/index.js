@@ -26,7 +26,7 @@ Error.stackTraceLimit = Infinity;
 let logStreams = [{
   name: 'stdout',
   stream: process.stdout,
-  level: 'TRACE'
+  level: env.log.level || 'TRACE'
 }];
 
 if (env.log.toDir) {
@@ -291,7 +291,7 @@ let mainMaster = function() {
     };
   }
 
-  log.info(startupLog, 'Starting');
+  log.trace(startupLog, 'Starting');
 
   for (let i = 0; i < env.forkCount; i++) {
     cluster.fork();
