@@ -34,4 +34,4 @@ start: ## Start the LambdaProxy server
 
 
 debug: ## Start the LambdaProxy server in debug mode
-	node-debug ./index.js | ./node_modules/bunyan/bin/bunyan
+	node --inspect ./index.js | ./node_modules/bunyan/bin/bunyan
