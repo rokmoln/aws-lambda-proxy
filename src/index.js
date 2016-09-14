@@ -173,7 +173,7 @@ let mainWorker = function() {
           require(name).handle
       };
     }),
-    clientContext: {
+    ctx: {
       env: _.pick(process.env, [
         'ENV_NAME',
         'API_BASE_URL',

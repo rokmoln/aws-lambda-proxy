@@ -27,11 +27,11 @@ export let create = function(options) {
     res.sendStatus(200);
   });
 
-  app.loadLambdas = function({lambdas, clientContext}) {
+  app.loadLambdas = function({lambdas, ctx}) {
     return exports.loadLambdas({
       app,
       lambdas,
-      clientContext
+      ctx
     });
   };
 
@@ -46,7 +46,7 @@ export let create = function(options) {
   return app;
 };
 
-export let loadLambdas = function({app, lambdas, clientContext}) {
+export let loadLambdas = function({app, lambdas, ctx}) {
   let locations = [];
   let arnPrefix = 'arn:aws:lambda:zz-central-1:000000000000:function';
 
@@ -54,12 +54,11 @@ export let loadLambdas = function({app, lambdas, clientContext}) {
     _.each((pkg.config['aws-lambda'] || {}).locations, function(location) {
       let locationRE = new RegExp(`^${location}$`);
       let functionName = `${process.env.ENV_NAME}-${name}`;
-      let ctx = {
+      _.merge(ctx, {
         functionName,
         functionVersion: '$LOCAL',
-        invokedFunctionArn: `${arnPrefix}:${functionName}:$LOCAL`,
-        clientContext
-      };
+        invokedFunctionArn: `${arnPrefix}:${functionName}:$LOCAL`
+      });
       locations.push({
         locationRE,
         ctx,
@@ -81,7 +80,8 @@ export let middleware = function(ctx, handle) {
       method: req.method,
       url: req.originalUrl,
       headers: req.headers,
-      body: req.body
+      body: req.body,
+      ctx
     }, ctx, function(err, lambdaRes) {
       if (err) {
         req.app.log.error(err);
@@ -103,10 +103,10 @@ export let makeLambdaProxyHandle = function(app, name) {
 
     awsLambda.invoke({
       FunctionName: `${app.env.project.name}-${name}`,
-      ClientContext: ctx.clientContext,
+      ClientContext: undefined,
       InvocationType: 'RequestResponse',
       LogType: 'None',
-      Payload: JSON.stringify(e),
+      Payload: JSON.stringify(_.merge({}, e, {ctx})),
       Qualifier: '$LATEST'
     }, function(err, data) {
       if (err) {
