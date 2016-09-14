@@ -13,8 +13,8 @@
   "files": [
     "apex",
     "index.js",
-    "node_modules",
-    "src"
+    "lib",
+    "node_modules"
   ],
   "scripts": {
     "start": "node ./index.js | ./node_modules/bunyan/bin/bunyan"
