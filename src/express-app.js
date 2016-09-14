@@ -5,13 +5,15 @@ import {Lambda} from 'aws-sdk';
 
 let awsLambda = new Lambda({apiVersion: '2015-03-31'});
 
+export let base64 = function(string) {
+  // maintain Node.js v4 compatibility
+  // return Buffer.from(string).toString('base64').slice(0, -1);
+  return new Buffer(string).toString('base64').slice(0, -1);
+};
+
 export let create = function(options) {
   let app = express();
-  // maintain Node.js v4 compatibility
-  // let hashedEnv =
-  //   Buffer.from(process.env.ENV_NAME).toString('base64').slice(0, -1);
-  let hashedEnv =
-    new Buffer(process.env.ENV_NAME).toString('base64').slice(0, -1);
+  let hashedEnv = base64(process.env.ENV_NAME);
 
   app.disable('x-powered-by');
   app.disable('etag');
