@@ -23,6 +23,21 @@ export let create = function(options) {
   app.env = options.env;
   app.log = options.log;
 
+  app.use(function(req, _res, next) {
+    if (req.path === `/health.${hashedEnv}`) {
+      return next();
+    }
+    options.log.debug({req: _.omit(req, [
+      '_parsedUrl',
+      '_readableState',
+      'client',
+      'connection',
+      'res',
+      'socket'
+    ])});
+    next();
+  });
+
   app.get(`/health.${hashedEnv}`, function(_req, res, _next) {
     res.sendStatus(200);
   });
