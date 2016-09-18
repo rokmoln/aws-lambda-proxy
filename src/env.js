@@ -38,7 +38,10 @@ apexPath = path.join(...apexPath);
 let apexFunPath = path.join(apexPath, 'functions');
 let projectPath = path.join(apexPath, `project.${process.env.ENV_NAME}.json`);
 let project = isProd ? {name: process.env.ENV_NAME} : require(projectPath);
-let lambdas = fs.readdirSync(apexFunPath);
+let lambdas = _.filter(fs.readdirSync(apexFunPath), function(lambda) {
+  let isDirectory = fs.statSync(`${apexFunPath}/${lambda}`).isDirectory();
+  return isDirectory;
+});
 
 let NODE_PATH = process.env.NODE_PATH || '';
 
