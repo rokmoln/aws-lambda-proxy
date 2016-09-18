@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import bodyParser from 'body-parser';
+import compression from 'compression';
 import express from 'express';
 import {Lambda} from 'aws-sdk';
 
@@ -18,6 +19,7 @@ export let create = function(options) {
   app.disable('x-powered-by');
   app.disable('etag');
   app.enable('trust proxy');
+  app.use(compression());
   app.use(bodyParser.json());
 
   app.env = options.env;
