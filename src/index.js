@@ -177,8 +177,7 @@ let mainWorker = function() {
       env: _.pick(process.env, [
         'ENV_NAME',
         'API_BASE_URL',
-        'WEB_BASE_URL',
-        'LOG_LEVEL'
+        'WEB_BASE_URL'
       ])
     }
   });
