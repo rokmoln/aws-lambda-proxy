@@ -14,7 +14,7 @@ import * as expressApp from './express-app';
 
 let heapdump;
 if (env.heartbeat.memThresholdRss && env.log.toDir) {
-  heapdump = require('heapdump');
+  heapdump = require('heapdump'); // eslint-disable-line import/no-extraneous-dependencies
 }
 let workerId = cluster.worker && cluster.worker.id || 'M';
 let httpServer;
