@@ -23,6 +23,6 @@
     "start": "node ./index.js | ./node_modules/bunyan/bin/bunyan"
   },
   "config": {
-    "upload-path": "/lambda-proxy"
+    "upload-path": "lambda-proxy"
   }
 }
