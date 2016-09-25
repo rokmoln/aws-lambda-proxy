@@ -21,7 +21,7 @@ export let create = function(options) {
   app.disable('etag');
   app.enable('trust proxy');
   app.use(compression());
-  app.use(bodyParser.json());
+  app.use(bodyParser.raw({type: '*/*'}));
 
   app.env = options.env;
   app.log = options.log;
@@ -70,7 +70,7 @@ export let loadLambdas = function({app, lambdas, ctx}) {
 
   _.each(lambdas, function({name, pkg, handle}) {
     _.each((pkg.config['aws-lambda'] || {}).locations, function(location) {
-      let locationRE = new RegExp(`^${location}$`);
+      location = location.replace(/{([^}]+)\+}/g, ':$1');
       let functionName = `${process.env.ENV_NAME}-${name}`;
       _.merge(ctx, {
         functionName,
@@ -78,16 +78,16 @@ export let loadLambdas = function({app, lambdas, ctx}) {
         invokedFunctionArn: `${arnPrefix}:${functionName}:$LOCAL`
       });
       locations.push({
-        locationRE,
+        location,
         ctx,
         handle
       });
     });
   });
 
-  _.each(locations, function({locationRE, ctx, handle}) {
+  _.each(locations, function({location, ctx, handle}) {
     let router = new express.Router();
-    router.all(locationRE, exports.middleware(ctx, handle));
+    router.all(location, exports.middleware(ctx, handle));
     app.use(router);
   });
 };
@@ -100,11 +100,11 @@ export let middleware = function(ctx, handle) {
     } = url.parse(req.originalUrl);
 
     handle({
-      method: req.method,
+      httpMethod: req.method,
       path: pathname,
       querystring: query,
       headers: req.headers,
-      body: req.body,
+      body: req.body.toString(),
       ctx
     }, ctx, function(err, lambdaRes) {
       if (err) {
