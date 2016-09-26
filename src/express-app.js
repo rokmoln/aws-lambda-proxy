@@ -30,14 +30,18 @@ export let create = function(options) {
     if (req.path === `/health.${hashedEnv}`) {
       return next();
     }
-    options.log.debug({req: _.omit(req, [
+    let slimReq = _.omit(req, [
       '_parsedUrl',
       '_readableState',
       'client',
       'connection',
       'res',
       'socket'
-    ])});
+    ]);
+    if (slimReq.body instanceof Buffer) {
+      slimReq.body = slimReq.body.toString();
+    }
+    options.log.debug({req: slimReq});
     next();
   });
 
@@ -45,11 +49,11 @@ export let create = function(options) {
     res.sendStatus(200);
   });
 
-  app.loadLambdas = function({lambdas, ctx}) {
+  app.loadLambdas = function({lambdas, stageVariables}) {
     return exports.loadLambdas({
       app,
       lambdas,
-      ctx
+      stageVariables
     });
   };
 
@@ -64,7 +68,7 @@ export let create = function(options) {
   return app;
 };
 
-export let loadLambdas = function({app, lambdas, ctx}) {
+export let loadLambdas = function({app, lambdas, stageVariables}) {
   let locations = [];
   let arnPrefix = 'arn:aws:lambda:zz-central-1:000000000000:function';
 
@@ -72,27 +76,36 @@ export let loadLambdas = function({app, lambdas, ctx}) {
     _.each((pkg.config['aws-lambda'] || {}).locations, function(location) {
       location = location.replace(/{([^}]+)\+}/g, ':$1');
       let functionName = `${process.env.ENV_NAME}-${name}`;
-      _.merge(ctx, {
+      let ctx = {
         functionName,
         functionVersion: '$LOCAL',
         invokedFunctionArn: `${arnPrefix}:${functionName}:$LOCAL`
-      });
+      };
       locations.push({
         location,
+        stageVariables,
         ctx,
         handle
       });
     });
   });
 
-  _.each(locations, function({location, ctx, handle}) {
+  _.each(locations, function({location, stageVariables, ctx, handle}) {
     let router = new express.Router();
-    router.all(location, exports.middleware(ctx, handle));
-    app.use(router);
+    router.all(location, exports.middleware({
+      stageVariables,
+      ctx,
+      handle
+    }));
+    if (stageVariables && stageVariables.API_BASE_PATH) {
+      app.use(stageVariables.API_BASE_PATH, router);
+    } else {
+      app.use(router);
+    }
   });
 };
 
-export let middleware = function(ctx, handle) {
+export let middleware = function({stageVariables, ctx, handle}) {
   return function(req, res, _next) {
     let {
       pathname,
@@ -105,7 +118,7 @@ export let middleware = function(ctx, handle) {
       querystring: query,
       headers: req.headers,
       body: req.body.toString(),
-      ctx
+      stageVariables
     }, ctx, function(err, lambdaRes) {
       if (err) {
         req.app.log.error(err);
