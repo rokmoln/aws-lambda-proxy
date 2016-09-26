@@ -2,6 +2,7 @@ import _ from 'lodash';
 import bodyParser from 'body-parser';
 import compression from 'compression';
 import express from 'express';
+import url from 'url';
 import {Lambda} from 'aws-sdk';
 
 let awsLambda = new Lambda({apiVersion: '2015-03-31'});
@@ -93,9 +94,15 @@ export let loadLambdas = function({app, lambdas, ctx}) {
 
 export let middleware = function(ctx, handle) {
   return function(req, res, _next) {
+    let {
+      pathname,
+      query
+    } = url.parse(req.originalUrl);
+
     handle({
       method: req.method,
-      url: req.originalUrl,
+      path: pathname,
+      querystring: query,
       headers: req.headers,
       body: req.body,
       ctx
