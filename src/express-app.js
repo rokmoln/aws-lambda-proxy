@@ -97,10 +97,11 @@ export let loadLambdas = function({app, lambdas, stageVariables}) {
       ctx,
       handle
     }));
-    if (stageVariables && stageVariables.API_BASE_PATH) {
-      app.use(stageVariables.API_BASE_PATH, router);
-    } else {
+    let basePath = url.parse(stageVariables.API_BASE_URL).pathname;
+    if (basePath === '/') {
       app.use(router);
+    } else {
+      app.use(basePath, router);
     }
   });
 };
