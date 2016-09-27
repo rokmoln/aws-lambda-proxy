@@ -175,9 +175,9 @@ let mainWorker = function() {
     }),
     stageVariables: _.pick(process.env, [
       'ENV_NAME',
+      // override
       'API_BASE_URL',
-      'WEB_BASE_URL',
-      'API_BASE_PATH'
+      'WEB_BASE_URL'
     ])
   });
 
