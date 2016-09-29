@@ -97,7 +97,7 @@ export let loadLambdas = function({app, lambdas, stageVariables}) {
       ctx,
       handle
     }));
-    let basePath = url.parse(ctx.env.API_BASE_URL).pathname;
+    let basePath = url.parse(stageVariables.API_BASE_URL).pathname;
     if (basePath === '/') {
       app.use(router);
     } else {
