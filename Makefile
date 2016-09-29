@@ -30,7 +30,7 @@ package.dir/VERSION:
 
 
 start: ## Start the LambdaProxy server
-	$(NODE) ./index.js
+	$(NODE) ./index.js | ./node_modules/bunyan/bin/bunyan
 
 
 debug: ## Start the LambdaProxy server in debug mode
