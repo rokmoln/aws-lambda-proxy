@@ -70,7 +70,7 @@ export let create = function(options) {
 
 export let loadLambdas = function({app, lambdas, stageVariables}) {
   let locations = [];
-  let arnPrefix = `arn:aws:lambda:zz-central-1:${env.AWS_ACCOUNT_ID}:function`;
+  let arnPrefix = `arn:aws:lambda:zz-central-1:${process.env.AWS_ACCOUNT_ID}:function`;
 
   _.each(lambdas, function({name, pkg, handle}) {
     _.each((pkg.config['aws-lambda'] || {}).locations, function(location) {
