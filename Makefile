@@ -30,8 +30,8 @@ package.dir/VERSION:
 
 
 start: ## Start the LambdaProxy server
-	$(NODE) ./index.js | ./node_modules/bunyan/bin/bunyan
+	AWS_ACCOUNT_ID=$(AWS_ACCOUNT_ID) $(NODE) ./index.js | ./node_modules/bunyan/bin/bunyan
 
 
 debug: ## Start the LambdaProxy server in debug mode
-	$(NODE) --inspect ./index.js | ./node_modules/bunyan/bin/bunyan
+	AWS_ACCOUNT_ID=$(AWS_ACCOUNT_ID) $(NODE) --inspect ./index.js | ./node_modules/bunyan/bin/bunyan
