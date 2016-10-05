@@ -40,6 +40,7 @@ export let create = function(options) {
       '_readableState',
       'client',
       'connection',
+      'host',
       'res',
       'socket'
     ]);
