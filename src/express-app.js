@@ -27,6 +27,11 @@ export let create = function(options) {
   app.log = options.log;
 
   app.use(function(req, _res, next) {
+    // bodyParser return {} if no body
+    if (_.isEmpty(req.body)) {
+      delete req.body;
+    }
+
     if (req.path === `/health.${hashedEnv}`) {
       return next();
     }
@@ -118,7 +123,7 @@ export let middleware = function({stageVariables, ctx, handle}) {
       path: pathname,
       querystring: query,
       headers: req.headers,
-      body: req.body.toString(),
+      body: req.body ? req.body.toString() : undefined,
       stageVariables
     }, ctx, function(err, lambdaRes) {
       if (err) {
