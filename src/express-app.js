@@ -97,18 +97,11 @@ export let loadLambdas = function({app, lambdas, stageVariables}) {
   });
 
   _.each(locations, function({location, stageVariables, ctx, handle}) {
-    let router = new express.Router();
-    router.all(location, exports.middleware({
+    app.all(location, exports.middleware({
       stageVariables,
       ctx,
       handle
     }));
-    let basePath = url.parse(stageVariables.API_BASE_URL).pathname;
-    if (basePath === '/') {
-      app.use(router);
-    } else {
-      app.use(basePath, router);
-    }
   });
 };
 
@@ -140,6 +133,11 @@ export let middleware = function({stageVariables, ctx, handle}) {
 
 export let makeLambdaProxyHandle = function(app, name) {
   return function(e, ctx = {}, cb = _.noop) {
+    let basePath = url.parse(e.stageVariables.API_BASE_URL).pathname;
+    if (basePath !== '/') {
+      e.path = `${basePath}${e.path}`;
+    }
+
     app.log.trace({
       tag_lambda: 'request',
       req: e
