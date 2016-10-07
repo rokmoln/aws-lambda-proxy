@@ -29,9 +29,9 @@ package.dir/VERSION:
 	done
 
 
-start: ## Start the LambdaProxy server
-	AWS_ACCOUNT_ID=$(AWS_ACCOUNT_ID) $(NODE) ./index.js | ./node_modules/bunyan/bin/bunyan
+server: ## Start the LambdaProxy server.
+	AWS_ACCOUNT_ID=$(AWS_ACCOUNT_ID) $(NODE) $(NODE_DEBUG_BRK) ./index.js | ./node_modules/bunyan/bin/bunyan
 
 
-debug: ## Start the LambdaProxy server in debug mode
-	AWS_ACCOUNT_ID=$(AWS_ACCOUNT_ID) $(NODE) --inspect ./index.js | ./node_modules/bunyan/bin/bunyan
+server/debug: ## Start the LambdaProxy server in debug-brk mode.
+	NODE_DEBUG_BRK="--inspect --debug-brk" $(MAKE) start
