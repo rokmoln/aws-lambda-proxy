@@ -118,7 +118,12 @@ export let middleware = function({stageVariables, ctx, handle}) {
       querystring: query,
       headers: req.headers,
       body: req.body ? req.body.toString() : undefined,
-      stageVariables
+      stageVariables,
+      requestContext: {
+        accountId: process.env.AWS_ACCOUNT_ID,
+        stage: 'local',
+        httpMethod: req.method
+      }
     }, ctx, function(err, lambdaRes) {
       if (err) {
         req.app.log.error(err);
@@ -143,12 +148,18 @@ export let makeLambdaProxyHandle = function(app, name) {
       req: e
     });
 
+    e = _.merge(
+      {},
+      _.omit(e, ['requestContext']),
+      {ctx}
+    );
+
     awsLambda.invoke({
       FunctionName: `${app.env.project.name}-${name}`,
       ClientContext: undefined,
       InvocationType: 'RequestResponse',
       LogType: 'None',
-      Payload: JSON.stringify(_.merge({}, e, {ctx})),
+      Payload: JSON.stringify(e),
       Qualifier: '$LATEST'
     }, function(err, data) {
       if (err) {
