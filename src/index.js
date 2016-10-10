@@ -32,7 +32,6 @@ let logStreams = [{
 if (env.log.toDir) {
   logStreams.push({
     name: 'default',
-    type: 'rotating-file',
     path: path.join(env.log.toDir, `${pkg.name}.log`),
     period: '1d',
     count: 7,
