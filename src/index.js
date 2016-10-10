@@ -172,12 +172,12 @@ let mainWorker = function() {
           require(name).handle
       };
     }),
-    stageVariables: _.pick(process.env, [
-      'ENV_NAME',
+    stageVariables: {
+      ENV_NAME: process.env.ENV_NAME,
       // override
-      'API_BASE_URL',
-      'WEB_BASE_URL'
-    ])
+      API_BASE_URL: `http://${env.address}:${env.port}`,
+      WEB_BASE_URL: process.env.WEB_BASE_URL
+    }
   });
 
   http.globalAgent.maxSockets = Infinity;
