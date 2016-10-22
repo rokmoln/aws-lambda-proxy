@@ -19,8 +19,6 @@ if (env.heartbeat.memThresholdRss && env.log.toDir) {
 let workerId = cluster.worker && cluster.worker.id || 'M';
 let httpServer;
 
-Error.stackTraceLimit = Infinity;
-
 // LOG
 
 let logStreams = [{
