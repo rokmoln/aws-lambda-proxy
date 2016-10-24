@@ -87,7 +87,9 @@ export let loadLambdas = function({app, lambdas, stageVariables}) {
 
   _.each(lambdas, function({name, pkg, handle}) {
     _.each(_.get(pkg, 'config.aws-lambda.locations', []), function(location) {
-      location = location.replace(/{([^}]+)\+}/g, ':$1');
+      // location = location.replace(/{([^}]+)\+}/g, ':$1');
+      location = location.replace(/{([^}]+)\+}/g, '*');
+      location = `${location}$`;
       let functionName = `${process.env.ENV_NAME}-${name}`;
       let ctx = {
         functionName,
@@ -105,6 +107,7 @@ export let loadLambdas = function({app, lambdas, stageVariables}) {
 
   _.each(locations, function({location, stageVariables, ctx, handle}) {
     app.all(location, exports.middleware({
+      location,
       stageVariables,
       ctx,
       handle
