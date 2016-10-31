@@ -28,11 +28,10 @@ package.dir/VERSION:
 		cp $(APEX_TOP)/functions/$${f}/package.json package.dir/apex/functions/$${f}/package.json; \
 	done
 
-DEBUG_NODE ?=
-ifeq (true,$(DEBUG_NODE))
+
 server: ## Start the LambdaProxy server.
-	AWS_ACCOUNT_ID=$(AWS_ACCOUNT_ID) $(NODE_DEBUG) ./index.js | ./node_modules/bunyan/bin/bunyan
-else
-server: ## Start the LambdaProxy server.
-	AWS_ACCOUNT_ID=$(AWS_ACCOUNT_ID) $(NODE) ./index.js | ./node_modules/bunyan/bin/bunyan
-endif
+	AWS_ACCOUNT_ID=$(AWS_ACCOUNT_ID) $(NODE) $(NODE_DEBUG_BRK) ./index.js | ./node_modules/bunyan/bin/bunyan
+
+
+server/debug: ## Start the LambdaProxy server in debug-brk mode.
+	NODE_DEBUG_BRK="--inspect --debug-brk" $(MAKE) start
