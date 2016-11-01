@@ -67,7 +67,7 @@ export let create = function(options) {
     if (err == null) {
       return res.sendStatus(404);
     }
-    options.log.error(err);
+    options.log.error({err});
     return res.sendStatus(500);
   });
 
@@ -136,7 +136,7 @@ export let middleware = function({stageVariables, ctx, handle}) {
       }
     }, ctx, function(err, lambdaRes) {
       if (err) {
-        req.app.log.error(err);
+        req.app.log.error({err});
         return res.status(500);
       }
       res.status(lambdaRes.statusCode);
