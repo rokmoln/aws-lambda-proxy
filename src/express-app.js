@@ -35,8 +35,8 @@ let awsLambda = new aws.Lambda({apiVersion: '2015-03-31'});
 
 export let base64 = function(string) {
   // maintain Node.js v4 compatibility
-  // return Buffer.from(string).toString('base64').slice(0, -1);
-  return new Buffer(string).toString('base64').slice(0, -1);
+  // return Buffer.from(string).toString('base64').replace(/=+$/, '');
+  return new Buffer(string).toString('base64').replace(/=+$/, '');
 };
 
 export let create = function(options) {
