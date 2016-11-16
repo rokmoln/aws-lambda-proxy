@@ -9,6 +9,7 @@
     "bunyan": "*",
     "compression": "*",
     "express": "*",
+    "ini": "*",
     "lodash": "*",
     "source-map-support": "*"
   },

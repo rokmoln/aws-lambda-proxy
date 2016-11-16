@@ -2,10 +2,36 @@ import _ from 'lodash';
 import bodyParser from 'body-parser';
 import compression from 'compression';
 import express from 'express';
+import fs from 'fs';
+import ini from 'ini';
 import url from 'url';
-import {Lambda} from 'aws-sdk';
+import aws from 'aws-sdk';
 
-let awsLambda = new Lambda({apiVersion: '2015-03-31'});
+// compatibility with aws-cli
+let awsProfile = process.env.AWS_PROFILE || process.env.AWS_DEFAULT_PROFILE;
+if (awsProfile) {
+  try {
+    let configIni = ini.parse(fs.readFileSync(
+      `${process.env.HOME}/.aws/config`,
+      'utf-8'
+    ));
+    let awsProfileConfig = configIni[`profile ${awsProfile}`];
+    if (awsProfileConfig && awsProfileConfig.role_arn) {
+      let roleArn = awsProfileConfig.role_arn.replace(/:/g, '_').replace(/[^A-Za-z0-9\-_]/g, '-');
+      let awsCliCacheFilename = `${awsProfile}--${roleArn}`;
+      let awsCliCache =
+          JSON.parse(fs.readFileSync(
+            `${process.env.HOME}/.aws/cli/cache/${awsCliCacheFilename}.json`,
+            'utf-8'
+          ));
+      let sts = new aws.STS();
+      aws.config.credentials = sts.credentialsFrom(awsCliCache);
+    }
+  } catch (_err) {
+  }
+}
+
+let awsLambda = new aws.Lambda({apiVersion: '2015-03-31'});
 
 export let base64 = function(string) {
   // maintain Node.js v4 compatibility
