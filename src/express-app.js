@@ -120,7 +120,7 @@ export let middleware = function({stageVariables, ctx, handle}) {
     let {
       pathname,
       query
-    } = url.parse(req.originalUrl);
+    } = url.parse(req.originalUrl, true);
 
     handle({
       httpMethod: req.method,
