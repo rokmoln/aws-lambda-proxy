@@ -151,7 +151,7 @@ export let middleware = function({stageVariables, ctx, handle}) {
     handle({
       httpMethod: req.method,
       path: pathname,
-      querystring: query,
+      queryStringParameters: query,
       headers: req.headers,
       body: req.body ? req.body.toString() : undefined,
       stageVariables,
