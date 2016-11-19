@@ -110,7 +110,6 @@ let onUncaughtException = function(err) {
       log.error('HTTP server is stalling upon closing down. Forcefully terminating.'); // eslint-disable-line max-len
       process.exit(1);
     });
-    return;
   }
 };
 
