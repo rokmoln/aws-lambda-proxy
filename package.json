@@ -5,6 +5,7 @@
   "description": "Lambda Proxy",
   "dependencies": {
     "aws-sdk": "*",
+    "babel-register": "*",
     "body-parser": "*",
     "bunyan": "*",
     "compression": "*",

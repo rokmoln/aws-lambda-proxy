@@ -7,6 +7,11 @@ import ini from 'ini';
 import url from 'url';
 import aws from 'aws-sdk';
 
+import 'babel-register';
+import {
+  makeApiSecondaryBasePath
+} from '../../../support/cfn/util';
+
 // compatibility with aws-cli
 let awsProfile = process.env.AWS_PROFILE || process.env.AWS_DEFAULT_PROFILE;
 if (awsProfile) {
@@ -32,6 +37,10 @@ if (awsProfile) {
 }
 
 let awsLambda = new aws.Lambda({apiVersion: '2015-03-31'});
+
+export let makeApiSecondaryBasePath2 = function({pkg}) {
+  return makeApiSecondaryBasePath({env: {STACK_STEM: pkg.config['aws-lambda'].stack}});
+};
 
 export let base64 = function(string) {
   // maintain Node.js v4 compatibility
@@ -101,6 +110,7 @@ export let create = function(options) {
 };
 
 export let loadLambdas = function({app, lambdas, stageVariables}) {
+  let apiSecondaryRouters = {};
   let locations = [];
   let arnPrefix = [
     'arn',
@@ -112,6 +122,8 @@ export let loadLambdas = function({app, lambdas, stageVariables}) {
   ].join(':');
 
   _.each(lambdas, function({name, pkg, handle}) {
+    let apiSecondaryBasePath = exports.makeApiSecondaryBasePath2({pkg});
+
     _.each(_.get(pkg, 'config.aws-lambda.locations', []), function(location) {
       // location = location.replace(/{([^}]+)\+}/g, ':$1');
       location = location.replace(/{([^}]+)\+}/g, '*');
@@ -123,6 +135,7 @@ export let loadLambdas = function({app, lambdas, stageVariables}) {
         invokedFunctionArn: `${arnPrefix}:${functionName}:$LOCAL`
       };
       locations.push({
+        apiSecondaryBasePath,
         location,
         stageVariables,
         ctx,
@@ -131,8 +144,19 @@ export let loadLambdas = function({app, lambdas, stageVariables}) {
     });
   });
 
-  _.each(locations, function({location, stageVariables, ctx, handle}) {
-    app.all(location, exports.middleware({
+  _.each(locations, function({apiSecondaryBasePath, location, stageVariables, ctx, handle}) {
+    let router = app;
+
+    if (apiSecondaryBasePath) {
+      router = apiSecondaryRouters[apiSecondaryBasePath];
+      if (!router) {
+        router = apiSecondaryRouters[apiSecondaryBasePath] = new express.Router();
+        app.use(apiSecondaryBasePath, router);
+      }
+    }
+
+    router.all(location, exports.middleware({
+      apiSecondaryBasePath,
       location,
       stageVariables,
       ctx,
@@ -141,12 +165,22 @@ export let loadLambdas = function({app, lambdas, stageVariables}) {
   });
 };
 
-export let middleware = function({stageVariables, ctx, handle}) {
+export let middleware = function({
+  apiSecondaryBasePath,
+  _location,
+  stageVariables,
+  ctx,
+  handle
+}) {
   return function(req, res, _next) {
     let {
       pathname,
       query
     } = url.parse(req.originalUrl, true);
+
+    if (apiSecondaryBasePath) {
+      pathname = pathname.replace(new RegExp(`^${apiSecondaryBasePath}`), '');
+    }
 
     handle({
       httpMethod: req.method,
