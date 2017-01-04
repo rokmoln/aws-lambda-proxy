@@ -149,6 +149,10 @@ export let loadLambdas = function({app, lambdas, stageVariables}) {
 
     if (apiSecondaryBasePath) {
       router = apiSecondaryRouters[apiSecondaryBasePath];
+      _.merge(stageVariables, {
+        API_SECONDARY_BASE_URL: `${stageVariables.API_BASE_URL}/${apiSecondaryBasePath}`,
+        API_SECONDARY_BASE_PATH: apiSecondaryBasePath
+      });
       if (!router) {
         router = apiSecondaryRouters[apiSecondaryBasePath] = new express.Router();
         app.use(apiSecondaryBasePath, router);
