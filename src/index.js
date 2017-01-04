@@ -170,9 +170,13 @@ let mainWorker = function() {
       };
     }),
     stageVariables: {
-      ENV_NAME: process.env.ENV_NAME,
       // override
+      API_BASE_PATH: '',
       API_BASE_URL: `http://${env.address}:${env.port}`,
+      API_SECONDARY_BASE_URL: `http://${env.address}:${env.port}`,
+      API_SECONDATY_BASE_PATH: '',
+      ENV_NAME: process.env.ENV_NAME,
+      LOG_LEVEL: process.env.LOG_LEVEL,
       WEB_BASE_URL: process.env.WEB_BASE_URL
     }
   });
