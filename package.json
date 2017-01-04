@@ -15,7 +15,6 @@
     "source-map-support": "*"
   },
   "files": [
-    "apex",
     "index.js",
     "lib",
     "node_modules",
