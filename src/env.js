@@ -79,7 +79,7 @@ module.exports = {
   lambdas,
   log: {
     level: process.env.LOG_LEVEL,
-    toDir: isProd ? undefined : '.'
+    toDir: undefined // isProd ? undefined : '.'
   },
   port: process.env.PORT,
   project
