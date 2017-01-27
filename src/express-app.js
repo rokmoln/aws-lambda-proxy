@@ -39,7 +39,8 @@ if (awsProfile) {
 let awsLambda = new aws.Lambda({apiVersion: '2015-03-31'});
 
 export let makeApiSecondaryBasePath2 = function({pkg}) {
-  return makeApiSecondaryBasePath({env: {STACK_STEM: pkg.config['aws-lambda'].stack}});
+  let STACK_STEM = _.find(pkg.config['aws-lambda'].stacks, /^env-api-/);
+  return makeApiSecondaryBasePath({env: {STACK_STEM}});
 };
 
 export let base64 = function(string) {
