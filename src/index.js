@@ -158,15 +158,16 @@ let mainWorker = function() {
   app.loadLambdas({
     lambdas: _.map(env.lambdas, function({name, pkg}) {
       let isProd =
-            (pkg.config.isProd == null) ?
-            env.isProd :
-            pkg.config.isProd;
+          (pkg.config.isProd == null) ?
+          env.isProd :
+          pkg.config.isProd;
+      let handle = isProd ?
+          expressApp.makeLambdaProxyHandle(app, name) :
+          expressApp.makeLambdaLocalHandle(app, name);
       return {
         name,
         pkg,
-        handle: isProd ?
-          expressApp.makeLambdaProxyHandle(app, name) :
-          require(name).handle
+        handle
       };
     }),
     stageVariables: {

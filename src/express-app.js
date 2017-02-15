@@ -36,7 +36,7 @@ if (awsProfile) {
   }
 }
 
-let awsLambda = new aws.Lambda({apiVersion: '2015-03-31'});
+let awsLambda = new aws.Lambda();
 
 export let makeSecondaryBasePath2 = function({pkg}) {
   let STACK_STEM = _.find(pkg.config['aws-lambda'].stacks, /^env-api-/);
@@ -253,6 +253,26 @@ export let makeLambdaProxyHandle = function(app, name) {
       });
 
       cb(null, body);
+    });
+  };
+};
+
+export let makeLambdaLocalHandle = function(app, name) {
+  let handle = require(name).handle;
+
+  return function(e, ctx = {}, cb = _.noop) {
+    awsLambda.getFunctionConfiguration({
+      FunctionName: `${app.env.project.name}-${name}`,
+      Qualifier: '$LATEST'
+    }, function(err, data) {
+      if (err) {
+        throw err;
+      }
+
+      ctx = _.defaultsDeep({
+        env: data.Environment.Variables
+      }, ctx);
+      handle(e, ctx, cb);
     });
   };
 };
