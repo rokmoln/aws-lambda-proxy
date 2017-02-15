@@ -131,6 +131,7 @@ export let loadLambdas = function({app, lambdas, stageVariables}) {
       location = `${location}$`;
       let functionName = `${process.env.ENV_NAME}-${name}`;
       let ctx = {
+        awsRequestId: '0',
         functionName,
         functionVersion: '$LOCAL',
         invokedFunctionArn: `${arnPrefix}:${functionName}:$LOCAL`
