@@ -9,8 +9,8 @@ import aws from 'aws-sdk';
 
 import 'babel-register';
 import {
-  makeApiSecondaryBasePath
-} from '../../../support/cfn/util';
+  makeSecondaryBasePath
+} from 'cfn-util/lib/env-api';
 
 // compatibility with aws-cli
 let awsProfile = process.env.AWS_PROFILE || process.env.AWS_DEFAULT_PROFILE;
@@ -38,9 +38,9 @@ if (awsProfile) {
 
 let awsLambda = new aws.Lambda({apiVersion: '2015-03-31'});
 
-export let makeApiSecondaryBasePath2 = function({pkg}) {
+export let makeSecondaryBasePath2 = function({pkg}) {
   let STACK_STEM = _.find(pkg.config['aws-lambda'].stacks, /^env-api-/);
-  return makeApiSecondaryBasePath({env: {STACK_STEM}});
+  return makeSecondaryBasePath({env: {STACK_STEM}});
 };
 
 export let base64 = function(string) {
@@ -123,7 +123,7 @@ export let loadLambdas = function({app, lambdas, stageVariables}) {
   ].join(':');
 
   _.each(lambdas, function({name, pkg, handle}) {
-    let apiSecondaryBasePath = exports.makeApiSecondaryBasePath2({pkg});
+    let apiSecondaryBasePath = exports.makeSecondaryBasePath2({pkg});
 
     _.each(_.get(pkg, 'config.aws-lambda.locations', []), function(location) {
       // location = location.replace(/{([^}]+)\+}/g, ':$1');
