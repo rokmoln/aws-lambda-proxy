@@ -16,7 +16,7 @@ let heapdump;
 if (env.heartbeat.memThresholdRss && env.log.toDir) {
   heapdump = require('heapdump'); // eslint-disable-line import/no-extraneous-dependencies
 }
-let workerId = cluster.worker && cluster.worker.id || 'M';
+let workerId = _.get(cluster, 'worker.id', 'M');
 let httpServer;
 
 // LOG
@@ -24,7 +24,7 @@ let httpServer;
 let logStreams = [{
   name: 'stdout',
   stream: process.stdout,
-  level: env.log.level || 'TRACE'
+  level: _.defaultTo(env.log.level, 'TRACE')
 }];
 
 if (env.log.toDir) {

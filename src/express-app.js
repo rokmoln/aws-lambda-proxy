@@ -13,7 +13,7 @@ import {
 } from 'cfn-util/lib/env-api';
 
 // compatibility with aws-cli
-let awsProfile = process.env.AWS_PROFILE || process.env.AWS_DEFAULT_PROFILE;
+let awsProfile = _.defaultTo(process.env.AWS_PROFILE, process.env.AWS_DEFAULT_PROFILE);
 if (awsProfile) {
   try {
     let configIni = ini.parse(fs.readFileSync(
@@ -117,7 +117,7 @@ export let loadLambdas = function({app, lambdas, stageVariables}) {
     'arn',
     'aws',
     'lambda',
-    process.env.AWS_REGION || 'zz-central-1',
+    _.defaultTo(process.env.AWS_REGION, 'zz-central-1'),
     process.env.AWS_ACCOUNT_ID,
     'function'
   ].join(':');

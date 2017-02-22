@@ -1,9 +1,9 @@
 /* eslint global-require:off */
 
+import _ from 'lodash';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import _ from 'lodash';
 
 if (!process.env.ENV_NAME) {
   throw new Error('process.env.ENV_NAME is undefined.');
@@ -42,7 +42,7 @@ let lambdas = _.filter(fs.readdirSync(apexFunPath), function(lambda) {
   return isDirectory;
 });
 
-let NODE_PATH = process.env.NODE_PATH || '';
+let NODE_PATH = _.defaultTo(process.env.NODE_PATH, '');
 
 // EASY LOADING OF API LAMBDAS
 
