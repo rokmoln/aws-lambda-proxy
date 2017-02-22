@@ -9,7 +9,7 @@ import aws from 'aws-sdk';
 
 import 'babel-register';
 import {
-  makeSecondaryBasePath
+  getSecondaryBasePath
 } from 'cfn-util/lib/env-api';
 
 // compatibility with aws-cli
@@ -38,9 +38,9 @@ if (awsProfile) {
 
 let awsLambda = new aws.Lambda();
 
-export let makeSecondaryBasePath2 = function({pkg}) {
+export let getSecondaryBasePath2 = function({pkg}) {
   let STACK_STEM = _.find(pkg.config['aws-lambda'].stacks, /^env-api-/);
-  return makeSecondaryBasePath({env: {STACK_STEM}});
+  return getSecondaryBasePath({env: {STACK_STEM}});
 };
 
 export let base64 = function(string) {
@@ -123,7 +123,7 @@ export let loadLambdas = function({app, lambdas, stageVariables}) {
   ].join(':');
 
   _.each(lambdas, function({name, pkg, handle}) {
-    let apiSecondaryBasePath = exports.makeSecondaryBasePath2({pkg});
+    let apiSecondaryBasePath = exports.getSecondaryBasePath2({pkg});
 
     _.each(_.get(pkg, 'config.aws-lambda.locations', []), function(location) {
       // location = location.replace(/{([^}]+)\+}/g, ':$1');
@@ -132,6 +132,9 @@ export let loadLambdas = function({app, lambdas, stageVariables}) {
       let functionName = `${process.env.ENV_NAME}-${name}`;
       let ctx = {
         awsRequestId: '0',
+        getRemainingTimeInMillis: function() {
+          return 60 * 1000; // FIXME
+        },
         functionName,
         functionVersion: '$LOCAL',
         invokedFunctionArn: `${arnPrefix}:${functionName}:$LOCAL`
