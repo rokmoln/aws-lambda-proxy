@@ -1,53 +1,16 @@
 import _ from 'lodash';
 import bodyParser from 'body-parser';
 import compression from 'compression';
+import env from './env';
 import express from 'express';
-import fs from 'fs';
-import ini from 'ini';
 import url from 'url';
-import aws from 'aws-sdk';
 
-import 'babel-register';
 import {
-  getSecondaryBasePath
-} from 'cfn-util/lib/env-api';
+  base64,
+  loadAwsCliCredentials
+} from './util';
 
-// compatibility with aws-cli
-let awsProfile = _.defaultTo(process.env.AWS_PROFILE, process.env.AWS_DEFAULT_PROFILE);
-if (awsProfile) {
-  try {
-    let configIni = ini.parse(fs.readFileSync(
-      `${process.env.HOME}/.aws/config`,
-      'utf-8'
-    ));
-    let awsProfileConfig = configIni[`profile ${awsProfile}`];
-    if (awsProfileConfig && awsProfileConfig.role_arn) {
-      let roleArn = awsProfileConfig.role_arn.replace(/:/g, '_').replace(/[^A-Za-z0-9\-_]/g, '-');
-      let awsCliCacheFilename = `${awsProfile}--${roleArn}`;
-      let awsCliCache =
-          JSON.parse(fs.readFileSync(
-            `${process.env.HOME}/.aws/cli/cache/${awsCliCacheFilename}.json`,
-            'utf-8'
-          ));
-      let sts = new aws.STS();
-      aws.config.credentials = sts.credentialsFrom(awsCliCache);
-    }
-  } catch (_err) {
-  }
-}
-
-let awsLambda = new aws.Lambda();
-
-export let getSecondaryBasePath2 = function({pkg}) {
-  let STACK_STEM = _.find(pkg.config['aws-lambda'].stacks, /^env-api-/);
-  return getSecondaryBasePath({env: {STACK_STEM}});
-};
-
-export let base64 = function(string) {
-  // maintain Node.js v4 compatibility
-  // return Buffer.from(string).toString('base64').replace(/=+$/, '');
-  return new Buffer(string).toString('base64').replace(/=+$/, '');
-};
+loadAwsCliCredentials();
 
 export let create = function(options) {
   let app = express();
@@ -91,16 +54,8 @@ export let create = function(options) {
     res.sendStatus(200);
   });
 
-  app.loadLambdas = function({lambdas, stageVariables}) {
-    return exports.loadLambdas({
-      app,
-      lambdas,
-      stageVariables
-    });
-  };
-
   app.use(function(err, _req, res, _next) {
-    if (err == null) {
+    if (_.isNil(err)) {
       return res.sendStatus(404);
     }
     options.log.error({err});
@@ -110,9 +65,8 @@ export let create = function(options) {
   return app;
 };
 
-export let loadLambdas = function({app, lambdas, stageVariables}) {
-  let apiSecondaryRouters = {};
-  let locations = [];
+export let loadLambdas = async function({app, lambdas}) {
+  let lambdaLocations = [];
   let arnPrefix = [
     'arn',
     'aws',
@@ -122,89 +76,73 @@ export let loadLambdas = function({app, lambdas, stageVariables}) {
     'function'
   ].join(':');
 
-  _.each(lambdas, function({name, pkg, handle}) {
-    let apiSecondaryBasePath = exports.getSecondaryBasePath2({pkg});
+  _.each(lambdas, function(lambda) {
+    let {
+      awsFunctionName,
+      locations
+    } = lambda;
 
-    _.each(_.get(pkg, 'config.aws-lambda.locations', []), function(location) {
+    _.each(locations, function(location) {
       // location = location.replace(/{([^}]+)\+}/g, ':$1');
       location = location.replace(/{([^}]+)\+}/g, '*');
       location = `${location}$`;
-      let functionName = `${process.env.ENV_NAME}-${name}`;
       let ctx = {
         awsRequestId: '0',
         getRemainingTimeInMillis: function() {
           return 60 * 1000; // FIXME
         },
-        functionName,
+        functionName: awsFunctionName,
         functionVersion: '$LOCAL',
-        invokedFunctionArn: `${arnPrefix}:${functionName}:$LOCAL`
+        invokedFunctionArn: `${arnPrefix}:${awsFunctionName}:$LOCAL`
       };
-      locations.push({
-        apiSecondaryBasePath,
-        location,
-        stageVariables,
+
+      lambdaLocations.push({
         ctx,
-        handle
+        lambda,
+        location
       });
     });
   });
 
-  _.each(locations, function({apiSecondaryBasePath, location, stageVariables, ctx, handle}) {
-    let router = app;
-
-    if (apiSecondaryBasePath) {
-      router = apiSecondaryRouters[apiSecondaryBasePath];
-      stageVariables = _.defaults({
-        API_SECONDARY_BASE_URL: `${stageVariables.API_BASE_URL}${apiSecondaryBasePath}`,
-        API_SECONDARY_BASE_PATH: apiSecondaryBasePath
-      }, stageVariables);
-      if (!router) {
-        router = new express.Router();
-        apiSecondaryRouters[apiSecondaryBasePath] = router;
-        app.use(apiSecondaryBasePath, router);
-      }
-    }
-
-    router.all(location, exports.middleware({
-      apiSecondaryBasePath,
-      location,
-      stageVariables,
+  Promise.all(_.map(lambdaLocations, async function({ctx, lambda, location}) {
+    let route = {
       ctx,
-      handle
-    }));
-  });
+      lambda,
+      location,
+      expressRouter: app
+    };
+
+    await env.hooks.preRouteSetup({env, route});
+    route.expressRouter.all(route.location, exports.middleware(route));
+  }));
 };
 
-export let middleware = function({
-  apiSecondaryBasePath,
-  _location,
-  stageVariables,
-  ctx,
-  handle
-}) {
-  return function(req, res, _next) {
+export let middleware = function(route) {
+  route = _.cloneDeep(route);
+
+  return async function(req, res, _next) {
     let {
       pathname,
       query
     } = url.parse(req.originalUrl, true);
 
-    if (apiSecondaryBasePath) {
-      pathname = pathname.replace(new RegExp(`^${apiSecondaryBasePath}`), '');
-    }
-
-    handle({
+    let e = {
       httpMethod: req.method,
       path: pathname,
       queryStringParameters: query,
       headers: req.headers,
       body: req.body ? req.body.toString() : undefined,
-      stageVariables,
+      stageVariables: {},
       requestContext: {
         accountId: process.env.AWS_ACCOUNT_ID,
         stage: 'local',
         httpMethod: req.method
       }
-    }, ctx, function(err, lambdaRes) {
+    };
+
+    await env.hooks.preHandle({e, env, route, req, res});
+
+    route.lambda.handle(e, route.ctx, function(err, lambdaRes) {
       if (err) {
         req.app.log.error({err});
         return res.status(500);
@@ -216,67 +154,4 @@ export let middleware = function({
   };
 };
 
-export let makeLambdaProxyHandle = function(app, name) {
-  return function(e, ctx = {}, cb = _.noop) {
-    let basePath = url.parse(e.stageVariables.API_BASE_URL).pathname;
-    if (basePath !== '/') {
-      e.path = `${basePath}${e.path}`;
-    }
-
-    app.log.trace({
-      tag_lambda: 'request',
-      req: e
-    });
-
-    e = _.merge(
-      {},
-      _.omit(e, ['requestContext']),
-      {ctx}
-    );
-
-    awsLambda.invoke({
-      FunctionName: `${app.env.project.name}-${name}`,
-      ClientContext: undefined,
-      InvocationType: 'RequestResponse',
-      LogType: 'None',
-      Payload: JSON.stringify(e),
-      Qualifier: '$LATEST'
-    }, function(err, data) {
-      if (err) {
-        app.log.error({err});
-        return cb(err);
-      }
-
-      let body = data.Payload ? JSON.parse(data.Payload) : undefined;
-      delete data.Payload;
-
-      app.log.trace({
-        tag_lambda: 'response',
-        res: body,
-        lambda_data: data
-      });
-
-      cb(null, body);
-    });
-  };
-};
-
-export let makeLambdaLocalHandle = function(app, name) {
-  let handle = require(name).handle;
-
-  return function(e, ctx = {}, cb = _.noop) {
-    awsLambda.getFunctionConfiguration({
-      FunctionName: `${app.env.project.name}-${name}`,
-      Qualifier: '$LATEST'
-    }, function(err, data) {
-      if (err) {
-        throw err;
-      }
-
-      ctx = _.defaultsDeep({
-        env: data.Environment.Variables
-      }, ctx);
-      handle(e, ctx, cb);
-    });
-  };
-};
+export default exports;

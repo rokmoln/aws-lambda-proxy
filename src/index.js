@@ -1,20 +1,22 @@
-/* eslint global-require:off, no-process-exit:off */
-
-import cluster from 'cluster';
-import http from 'http';
-import os from 'os';
-import path from 'path';
-
 import _ from 'lodash';
 import bunyan from 'bunyan';
-
-import pkg from '../package.json';
+import cluster from 'cluster';
 import env from './env';
-import * as expressApp from './express-app';
+import expressApp from './express-app';
+import http from 'http';
+import os from 'os';
+import makeLocalHandle from './handlers/local';
+import makeProxyHandle from './handlers/proxy';
+import path from 'path';
+import pkg from '../package.json';
 
 let heapdump;
 if (env.heartbeat.memThresholdRss && env.log.toDir) {
-  heapdump = require('heapdump'); // eslint-disable-line import/no-extraneous-dependencies
+  try {
+    // eslint-disable-next-line dependencies/no-unresolved, import/no-extraneous-dependencies
+    heapdump = require('heapdump');
+  } catch (_err) {
+  }
 }
 let workerId = _.get(cluster, 'worker.id', 'M');
 let httpServer;
@@ -40,7 +42,7 @@ if (env.log.toDir) {
 let log = bunyan.createLogger({
   name: pkg.name,
   src: true,
-  serializers: null,
+  serializers: undefined,
   streams: logStreams
 });
 
@@ -54,6 +56,10 @@ if (!cluster.isMaster) {
 // EVENT HANDLERS
 
 let writeHeapSnapshot = function(logObj) {
+  if (!heapdump) {
+    return;
+  }
+
   let filename = `${pkg.name}.${workerId}.uncaughtException.heapsnapshot`;
   logObj.heapsnapshot = {
     filename
@@ -62,6 +68,10 @@ let writeHeapSnapshot = function(logObj) {
 };
 
 let maybeWriteHeapSnapshot = function(logObj) {
+  if (!heapdump) {
+    return;
+  }
+
   let thresholdRss = env.heartbeat.memThresholdRss;
   let currentRss;
   currentRss = logObj.process.memoryUsage.rss / (1024 * 1024);
@@ -92,22 +102,23 @@ let onUncaughtException = function(err) {
   console.error(err);
   console.error(err.stack);
   try {
-    if (heapdump) {
-      writeHeapSnapshot(exceptionLog);
-    }
+    writeHeapSnapshot(exceptionLog);
     log.fatal(exceptionLog, 'Uncaught exception');
   } catch (e) {
     console.error(e);
   }
 
   if (cluster.isMaster || !httpServer) {
+    // eslint-disable-next-line no-process-exit
     process.exit(1);
   } else {
     httpServer.close(function() {
+    // eslint-disable-next-line no-process-exit
       process.exit(1);
     });
     setTimeout(function() {
       log.error('HTTP server is stalling upon closing down. Forcefully terminating.'); // eslint-disable-line max-len
+    // eslint-disable-next-line no-process-exit
       process.exit(1);
     });
   }
@@ -129,10 +140,8 @@ let onHeartbeat = (function() {
       }
     };
 
-    if (heapdump) {
-      if (maybeWriteHeapSnapshot(heartbeatLog)) {
-        level = 'warn';
-      }
+    if (maybeWriteHeapSnapshot(heartbeatLog)) {
+      level = 'warn';
     }
 
     log[level](heartbeatLog, 'Heartbeat');
@@ -141,12 +150,8 @@ let onHeartbeat = (function() {
 
 // MAIN
 
-let main = function() {
+let mainWorker = async function() {
   process.on('uncaughtException', onUncaughtException);
-};
-
-let mainWorker = function() {
-  main();
 
   let app = expressApp.create({
     address: env.address,
@@ -155,32 +160,20 @@ let mainWorker = function() {
     log
   });
 
-  app.loadLambdas({
-    lambdas: _.map(env.lambdas, function({name, pkg}) {
-      let isProd =
-          (pkg.config.isProd == null) ?
-          env.isProd :
-          pkg.config.isProd;
-      let handle = isProd ?
-          expressApp.makeLambdaProxyHandle(app, name) :
-          expressApp.makeLambdaLocalHandle(app, name);
-      return {
-        name,
-        pkg,
-        handle
-      };
-    }),
-    stageVariables: {
-      // override
-      API_BASE_PATH: '',
-      API_BASE_URL: `http://${env.address}:${env.port}`,
-      API_SECONDARY_BASE_URL: `http://${env.address}:${env.port}`,
-      API_SECONDARY_BASE_PATH: '',
-      ENV_NAME: process.env.ENV_NAME,
-      LOG_LEVEL: process.env.LOG_LEVEL,
-      WEB_BASE_URL: process.env.WEB_BASE_URL
+  // [{awsFunctionName, isProd, locations, mainFun, pkg}]
+  let lambdas = await env.hooks.findLambdas({env});
+
+  lambdas = _.each(lambdas, function(lambda) {
+    let makeHandle = makeProxyHandle;
+
+    makeHandle = makeLocalHandle;
+    if (lambda.isProd) {
+      makeHandle = makeProxyHandle;
     }
+    lambda.handle = makeHandle({app, lambda});
   });
+
+  await expressApp.loadLambdas({app, lambdas});
 
   http.globalAgent.maxSockets = Infinity;
   httpServer = http.createServer(app);
@@ -235,11 +228,12 @@ let mainMaster = function() {
     process.stdin.resume();
     process.stdin.on('close', function() {
       _.curry(onSimpleEvent)('stdin_close')(arguments);
+    // eslint-disable-next-line no-process-exit
       process.exit(0);
     });
   }
 
-  main();
+  process.on('uncaughtException', onUncaughtException);
   cluster
     .on('fork', _.curry(onSimpleEvent)('fork'))
     .on('online', _.curry(onSimpleEvent)('online'))
@@ -292,9 +286,9 @@ let mainMaster = function() {
 
   log.trace(startupLog, 'Starting');
 
-  for (let i = 0; i < env.forkCount; i++) {
+  _.each(_.range(0, env.forkCount), function() {
     cluster.fork();
-  }
+  });
 };
 
 // RUN
