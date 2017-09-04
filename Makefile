@@ -7,12 +7,13 @@ endif
 
 include support-firecloud/repo/Makefile.pkg.node.mk
 
+BUNYAN ?= $(call which,BUNYAN,bunyan)
 NODE_DEBUG_BRK ?=
 
 # ------------------------------------------------------------------------------
 
-server: ## Start the LambdaProxy server.
-	AWS_ACCOUNT_ID=$(AWS_ACCOUNT_ID) $(NODE) $(NODE_DEBUG_BRK) ./index.js | ./node_modules/bunyan/bin/bunyan
+server: guard-env-AWS_ACCOUNT_ID ## Start the LambdaProxy server.
+	$(NODE) $(NODE_DEBUG_BRK) ./index.js | $(BUNYAN)
 
 
 server/debug: ## Start the LambdaProxy server in debug-brk mode.
