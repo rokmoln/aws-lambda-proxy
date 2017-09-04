@@ -2,7 +2,7 @@
   "private": true,
   "name": "aws-lambda-proxy",
   "description": "AWS Lambda Proxy. Local HTTP server that forwards requests to AWS Lambdas.",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "license": "Apache-2.0",
   "dependencies": {
     "aws-sdk": "2.53.0",
