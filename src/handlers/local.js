@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-firecloud';
 import aws from 'aws-sdk';
 
 let awsLambda = new aws.Lambda();

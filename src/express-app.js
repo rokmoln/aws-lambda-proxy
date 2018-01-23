@@ -1,20 +1,13 @@
-import _ from 'lodash';
+import _ from 'lodash-firecloud';
 import bodyParser from 'body-parser';
 import compression from 'compression';
 import env from './env';
 import express from 'express';
 import url from 'url';
 
-import {
-  base64,
-  loadAwsCliCredentials
-} from './util';
-
-loadAwsCliCredentials();
-
 export let create = function(options) {
   let app = express();
-  let hashedEnv = base64(process.env.ENV_NAME);
+  let hashedEnv = _.base64(process.env.ENV_NAME);
 
   app.disable('x-powered-by');
   app.disable('etag');

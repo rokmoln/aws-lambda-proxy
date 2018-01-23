@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'lodash-firecloud';
 import os from 'os';
 
 if (!process.env.ENV_NAME) {
