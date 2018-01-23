@@ -14,7 +14,8 @@ export let loadAwsCliCredentials = function() {
     ));
     let awsProfileConfig = configIni[`profile ${awsProfile}`];
     if (awsProfileConfig && awsProfileConfig.role_arn) {
-      let roleArn = awsProfileConfig.role_arn.replace(/:/g, '_').replace(/[^A-Za-z0-9\-_]/g, '-');
+      let roleArn = _.replace(awsProfileConfig.role_arn, /[^A-Za-z0-9\-_:]/g, '-');
+      roleArn = _.replace(roleArn, /:/g, '_');
       let awsCliCacheFilename = `${awsProfile}--${roleArn}`;
       let awsCliCache =
           JSON.parse(fs.readFileSync(

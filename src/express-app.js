@@ -76,15 +76,15 @@ export let loadLambdas = async function({app, lambdas}) {
     'function'
   ].join(':');
 
-  _.each(lambdas, function(lambda) {
+  _.forEach(lambdas, function(lambda) {
     let {
       awsFunctionName,
       locations
     } = lambda;
 
-    _.each(locations, function(location) {
+    _.forEach(locations, function(location) {
       // location = location.replace(/{([^}]+)\+}/g, ':$1');
-      location = location.replace(/{([^}]+)\+}/g, '*');
+      location = _.replace(location, /{([^}]+)\+}/g, '*');
       location = `${location}$`;
       let ctx = {
         awsRequestId: '0',

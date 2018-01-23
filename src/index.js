@@ -99,12 +99,15 @@ let onUncaughtException = function(err) {
     }
   };
 
+  // eslint-disable-next-line no-console
   console.error(err);
+  // eslint-disable-next-line no-console
   console.error(err.stack);
   try {
     writeHeapSnapshot(exceptionLog);
     log.fatal(exceptionLog, 'Uncaught exception');
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error(e);
   }
 
@@ -163,7 +166,7 @@ let mainWorker = async function() {
   // [{awsFunctionName, isProd, locations, mainFun, pkg}]
   let lambdas = await env.hooks.findLambdas({env});
 
-  lambdas = _.each(lambdas, function(lambda) {
+  _.forEach(lambdas, function(lambda) {
     let makeHandle = makeProxyHandle;
 
     makeHandle = makeLocalHandle;
@@ -195,6 +198,7 @@ let mainWorker = async function() {
 
 let onSimpleEvent = function(event, worker) {
   let level = 'info';
+  // eslint-disable-next-line fp/no-arguments
   let args = Array.prototype.slice.call(arguments, 1);
 
   if (worker instanceof cluster.Worker) {
@@ -206,6 +210,7 @@ let onSimpleEvent = function(event, worker) {
   if (event === 'error') {
     level = 'error';
   }
+  // eslint-disable-next-line fp/no-arguments
   if (event === 'exit' && arguments[0] !== 0) {
     level = 'error';
   }
@@ -227,6 +232,7 @@ let mainMaster = function() {
   if (env.isProd) {
     process.stdin.resume();
     process.stdin.on('close', function() {
+      // eslint-disable-next-line fp/no-arguments
       _.curry(onSimpleEvent)('stdin_close')(arguments);
     // eslint-disable-next-line no-process-exit
       process.exit(0);
@@ -267,7 +273,7 @@ let mainMaster = function() {
       uptime: process.uptime()
     };
     startupLog.process.env.NODE_PATH =
-      _.compact(_.uniq(startupLog.process.env.NODE_PATH.split(':')));
+      _.compact(_.uniq(_.split(startupLog.process.env.NODE_PATH, ':')));
 
     startupLog.os = {
       arch: os.arch(),
@@ -286,7 +292,7 @@ let mainMaster = function() {
 
   log.trace(startupLog, 'Starting');
 
-  _.each(_.range(0, env.forkCount), function() {
+  _.forEach(_.range(0, env.forkCount), function() {
     cluster.fork();
   });
 };
@@ -295,14 +301,21 @@ let mainMaster = function() {
 
 let run = function() {
   if (cluster.isMaster) {
+    // eslint-disable-next-line no-console
     console.log(`PID=${process.pid}`);
+    // eslint-disable-next-line no-console
     console.log(`PORT=${env.port}`);
+    // eslint-disable-next-line no-console
     console.log('---');
 
     if (!env.isProd) {
+      // eslint-disable-next-line no-console
       console.log(`Started server on http://${env.address}:${env.port}`);
+      // eslint-disable-next-line no-console
       console.log('Press CTRL-C to stop');
+      // eslint-disable-next-line no-console
       console.log(`To debug, run: kill -SIGUSR1 ${process.pid}`);
+      // eslint-disable-next-line no-console
       console.log('---');
     }
 
