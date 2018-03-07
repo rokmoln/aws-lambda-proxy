@@ -1,3 +1,4 @@
-/*.log*
-/lib
-/node_modules
+/.npmignore
+/coverage/
+/lib/
+/node_modules/

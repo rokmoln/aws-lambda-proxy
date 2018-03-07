@@ -7,7 +7,6 @@ import url from 'url';
 
 export let create = function(options) {
   let app = express();
-  let hashedEnv = _.base64(process.env.ENV_NAME);
 
   app.disable('x-powered-by');
   app.disable('etag');
@@ -24,7 +23,7 @@ export let create = function(options) {
       delete req.body;
     }
 
-    if (req.path === `/health.${hashedEnv}`) {
+    if (req.path === '/health') {
       return next();
     }
     let slimReq = _.omit(req, [
@@ -43,7 +42,7 @@ export let create = function(options) {
     next();
   });
 
-  app.get(`/health.${hashedEnv}`, function(_req, res, _next) {
+  app.get('/health', function(_req, res, _next) {
     res.sendStatus(200);
   });
 

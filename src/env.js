@@ -1,10 +1,6 @@
 import _ from 'lodash-firecloud';
 import os from 'os';
 
-if (!process.env.ENV_NAME) {
-  throw new Error('process.env.ENV_NAME is undefined.');
-}
-
 let isProd = /^prod/.test(process.env.NODE_ENV);
 
 _.defaults(process.env, {
