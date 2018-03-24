@@ -4,9 +4,9 @@ import cluster from 'cluster';
 import env from './env';
 import expressApp from './express-app';
 import http from 'http';
-import os from 'os';
 import makeLocalHandle from './handlers/local';
 import makeProxyHandle from './handlers/proxy';
+import os from 'os';
 import path from 'path';
 import pkg from '../package.json';
 

@@ -46,6 +46,7 @@ export let create = function(options) {
     res.sendStatus(200);
   });
 
+  // eslint-disable-next-line max-params
   app.use(function(err, _req, res, _next) {
     if (_.isNil(err)) {
       return res.sendStatus(404);
