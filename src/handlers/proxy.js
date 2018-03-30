@@ -2,7 +2,7 @@ import _ from 'lodash-firecloud';
 import aws from 'aws-sdk';
 import url from 'url';
 
-let awsLambda = new aws.Lambda();
+let _awsLambda = new aws.Lambda();
 
 export let makeProxyHandler = function({app, lambda: {awsFunctionName}}) {
   return function(e, ctx = {}, cb = _.noop) {
@@ -22,7 +22,7 @@ export let makeProxyHandler = function({app, lambda: {awsFunctionName}}) {
       {ctx}
     );
 
-    awsLambda.invoke({
+    _awsLambda.invoke({
       FunctionName: awsFunctionName,
       ClientContext: undefined,
       InvocationType: 'RequestResponse',

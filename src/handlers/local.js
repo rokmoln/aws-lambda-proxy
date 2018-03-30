@@ -1,11 +1,11 @@
 import _ from 'lodash-firecloud';
 import aws from 'aws-sdk';
 
-let awsLambda = new aws.Lambda();
+let _awsLambda = new aws.Lambda();
 
 export let makeLocalHandler = function({lambda: {mainFun, awsFunctionName}}) {
   return function(e, ctx = {}, cb = _.noop) {
-    awsLambda.getFunctionConfiguration({
+    _awsLambda.getFunctionConfiguration({
       FunctionName: awsFunctionName,
       Qualifier: '$LATEST'
     }, function(err, data) {

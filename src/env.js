@@ -1,7 +1,7 @@
 import _ from 'lodash-firecloud';
 import os from 'os';
 
-let isProd = /^prod/.test(process.env.NODE_ENV);
+export let isProd = /^prod/.test(process.env.NODE_ENV);
 
 _.defaults(process.env, {
   PORT: '8081',
@@ -24,7 +24,7 @@ if (!isProd) {
 
 // MAIN
 
-let hooks = {
+export let hooks = {
   findLambdas: _.noop,
   preRouteSetup: _.noop,
   preHandle: _.noop
@@ -34,7 +34,7 @@ if (process.env.HOOKS_MODULE) {
   hooks = require(process.env.HOOKS_MODULE);
 }
 
-let env = {
+export let env = {
   address: '127.0.0.1',
   forkCount: isProd ? os.cpus().length : 0,
   heartbeat: {
@@ -50,4 +50,4 @@ let env = {
   port: process.env.PORT
 };
 
-module.exports = env;
+export default env;
