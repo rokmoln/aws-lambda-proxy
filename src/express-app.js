@@ -1,9 +1,11 @@
 import _ from 'lodash-firecloud';
+import _express from 'express';
 import bodyParser from 'body-parser';
 import compression from 'compression';
 import env from './env';
-import express from 'express';
 import url from 'url';
+
+export let express = _express;
 
 export let create = function(options) {
   let app = express();
