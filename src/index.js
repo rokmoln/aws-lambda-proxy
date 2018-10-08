@@ -99,15 +99,12 @@ let onUncaughtException = function(err) {
     }
   };
 
-  // eslint-disable-next-line no-console
   console.error(err);
-  // eslint-disable-next-line no-console
   console.error(err.stack);
   try {
     writeHeapSnapshot(exceptionLog);
     log.fatal(exceptionLog, 'Uncaught exception');
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.error(e);
   }
 
@@ -301,21 +298,14 @@ let mainMaster = function() {
 
 let run = function() {
   if (cluster.isMaster) {
-    // eslint-disable-next-line no-console
     console.log(`PID=${process.pid}`);
-    // eslint-disable-next-line no-console
     console.log(`PORT=${env.port}`);
-    // eslint-disable-next-line no-console
     console.log('---');
 
     if (!env.isProd) {
-      // eslint-disable-next-line no-console
       console.log(`Started server on http://${env.address}:${env.port}`);
-      // eslint-disable-next-line no-console
       console.log('Press CTRL-C to stop');
-      // eslint-disable-next-line no-console
       console.log(`To debug, run: kill -SIGUSR1 ${process.pid}`);
-      // eslint-disable-next-line no-console
       console.log('---');
     }
 
