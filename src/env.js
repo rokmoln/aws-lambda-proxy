@@ -25,21 +25,15 @@ if (!isProd) {
 // MAIN
 
 export let hooks = {
-  findLambdas: async function() {
-    throw new Error('"findLambdas" hook not defined');
-  },
-  preRouteSetup: async function() {
-    throw new Error('"preRouteSetup" hook not defined');
-  },
-  preHandle: async function() {
-    throw new Error('"preHandle" hook not defined');
-  }
+  findLambdas: _.abstract('findLambdas'),
+  preRouteSetup: _.abstract('preRouteSetup'),
+  preHandle: _.abstract('preHandle')
 };
 
 if (process.env.HOOKS_MODULE) {
   hooks = require(process.env.HOOKS_MODULE);
 } else {
-  console.error(`Env variable HOOKS_MODULE not set!`);
+  console.error('Env variable HOOKS_MODULE not set!');
   // eslint-disable-next-line no-process-exit
   process.exit(1);
 }
