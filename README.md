@@ -23,5 +23,5 @@ and
 [Apache 2.0](LICENSE)
 
 
-  [1]: https://travis-ci.org/tobiipro/aws-lambda-proxy
-  [2]: https://travis-ci.org/tobiipro/aws-lambda-proxy.svg?branch=master
+  [1]: https://travis-ci.com/tobiipro/aws-lambda-proxy
+  [2]: https://travis-ci.com/tobiipro/aws-lambda-proxy.svg?branch=master
