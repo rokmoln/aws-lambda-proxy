@@ -118,7 +118,7 @@ let onUncaughtException = function(err) {
     });
     setTimeout(function() {
       log.error('HTTP server is stalling upon closing down. Forcefully terminating.'); // eslint-disable-line max-len
-    // eslint-disable-next-line no-process-exit
+      // eslint-disable-next-line no-process-exit
       process.exit(1);
     });
   }
@@ -231,7 +231,7 @@ let mainMaster = function() {
     process.stdin.on('close', function() {
       // eslint-disable-next-line fp/no-arguments
       _.curry(onSimpleEvent)('stdin_close')(arguments);
-    // eslint-disable-next-line no-process-exit
+      // eslint-disable-next-line no-process-exit
       process.exit(0);
     });
   }
