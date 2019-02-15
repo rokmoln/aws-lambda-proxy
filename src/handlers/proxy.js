@@ -4,7 +4,12 @@ import url from 'url';
 
 let _awsLambda = new aws.Lambda();
 
-export let makeProxyHandler = function({app, lambda: {awsFunctionName}}) {
+export let makeProxyHandler = function({
+  app,
+  lambda: {
+    awsFunctionName
+  }
+}) {
   return function(e, ctx = {}, cb = _.noop) {
     let basePath = url.parse(e.stageVariables.API_BASE_URL).pathname;
     if (basePath !== '/') {
@@ -18,8 +23,12 @@ export let makeProxyHandler = function({app, lambda: {awsFunctionName}}) {
 
     e = _.merge(
       {},
-      _.omit(e, ['requestContext']),
-      {ctx}
+      _.omit(e, [
+        'requestContext'
+      ]),
+      {
+        ctx
+      }
     );
 
     _awsLambda.invoke({

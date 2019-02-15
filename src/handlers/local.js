@@ -3,7 +3,12 @@ import aws from 'aws-sdk';
 
 let _awsLambda = new aws.Lambda();
 
-export let makeLocalHandler = function({lambda: {mainFun, awsFunctionName}}) {
+export let makeLocalHandler = function({
+  lambda: {
+    mainFun,
+    awsFunctionName
+  }
+}) {
   return function(e, ctx = {}, cb = _.noop) {
     _awsLambda.getFunctionConfiguration({
       FunctionName: awsFunctionName,
