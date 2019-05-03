@@ -18,9 +18,9 @@ export let makeLocalHandler = function({
         throw err;
       }
 
-      ctx = _.defaultsDeep({
-        env: data.Environment.Variables
-      }, ctx);
+      e = _.defaultsDeep({}, e, {
+        stageVariables: data.Environment.Variables
+      });
       mainFun(e, ctx, cb);
     });
   };
