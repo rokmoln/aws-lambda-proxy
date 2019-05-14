@@ -117,7 +117,7 @@ let onUncaughtException = function(err) {
       process.exit(1);
     });
     setTimeout(function() {
-      log.error('HTTP server is stalling upon closing down. Forcefully terminating.'); // eslint-disable-line max-len
+      log.error('HTTP server is stalling upon closing down. Forcefully terminating.');
       // eslint-disable-next-line no-process-exit
       process.exit(1);
     });
