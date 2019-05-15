@@ -1,8 +1,10 @@
 module.exports = {
   root: true,
+
   extends: [
-    'firecloud/node.js'
+    'firecloud/node'
   ],
+
   rules: {
     'global-require': 'off',
     'no-console': 'off'
