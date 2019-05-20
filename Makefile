@@ -11,13 +11,12 @@ include support-firecloud/repo/mk/js.publish.npg.mk
 
 # ------------------------------------------------------------------------------
 
-BUNYAN ?= $(call which,BUNYAN,bunyan)
 NODE_DEBUG_BRK ?=
 
 # ------------------------------------------------------------------------------
 
 server: guard-env-AWS_ACCOUNT_ID ## Start the LambdaProxy server.
-	$(NODE) $(NODE_DEBUG_BRK) ./index.js | $(BUNYAN)
+	$(NODE) $(NODE_DEBUG_BRK) ./index.js
 
 
 server/debug: ## Start the LambdaProxy server in debug-brk mode.

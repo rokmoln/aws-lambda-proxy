@@ -16,10 +16,10 @@
   "dependencies": {
     "aws-sdk": "^2.373.0",
     "body-parser": "^1.18.3",
-    "bunyan": "^1.8.12",
     "compression": "^1.7.3",
     "express": "^4.16.4",
-    "lodash-firecloud": "git://github.com/tobiipro/lodash-firecloud.git#semver:~0.2.1"
+    "lodash-firecloud": "git://github.com/tobiipro/lodash-firecloud.git#semver:~0.2.1",
+    "minlog": "git://github.com/tobiipro/minlog.git#semver:~0.3.19"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.0",

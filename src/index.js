@@ -1,13 +1,12 @@
 import _ from 'lodash-firecloud';
-import bunyan from 'bunyan';
 import cluster from 'cluster';
 import env from './env';
 import expressApp from './express-app';
 import http from 'http';
+import log from './log';
 import makeLocalHandle from './handlers/local';
 import makeProxyHandle from './handlers/proxy';
 import os from 'os';
-import path from 'path';
 import pkg from '../package.json';
 
 let heapdump;
@@ -20,38 +19,6 @@ if (env.heartbeat.memThresholdRss && env.log.toDir) {
 }
 let workerId = _.get(cluster, 'worker.id', 'M');
 let httpServer;
-
-// LOG
-
-let logStreams = [{
-  name: 'stdout',
-  stream: process.stdout,
-  level: _.defaultTo(env.log.level, 'TRACE')
-}];
-
-if (env.log.toDir) {
-  logStreams.push({
-    name: 'default',
-    path: path.join(env.log.toDir, `${pkg.name}.log`),
-    period: '1d',
-    count: 7,
-    level: env.log.level
-  });
-}
-
-let log = bunyan.createLogger({
-  name: pkg.name,
-  src: true,
-  serializers: undefined,
-  streams: logStreams
-});
-
-if (!cluster.isMaster) {
-  log = log.child({
-    tagServerWorker: true,
-    workerId
-  });
-}
 
 // EVENT HANDLERS
 
