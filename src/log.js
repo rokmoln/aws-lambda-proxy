@@ -26,7 +26,9 @@ let _log = new MinLog({
     logToConsole({
       level: _.defaultTo(env.log.level, 'TRACE')
     })
-  ]
+  ],
+  requireRawEntry: true,
+  requireSrc: true
 });
 
 if (!cluster.isMaster) {
