@@ -12,7 +12,7 @@ import pkg from '../package.json';
 let heapdump;
 if (env.heartbeat.memThresholdRss && env.log.toDir) {
   try {
-    // eslint-disable-next-line dependencies/no-unresolved, import/no-extraneous-dependencies
+    // eslint-disable-next-line import/no-extraneous-dependencies
     heapdump = require('heapdump');
   } catch (_err) {
   }
@@ -162,7 +162,7 @@ let mainWorker = async function() {
 
 let onSimpleEvent = function(event, worker) {
   let level = 'info';
-  // eslint-disable-next-line fp/no-arguments
+  // eslint-disable-next-line fp/no-arguments, prefer-rest-params
   let args = Array.prototype.slice.call(arguments, 1);
 
   if (worker instanceof cluster.Worker) {
@@ -174,7 +174,7 @@ let onSimpleEvent = function(event, worker) {
   if (event === 'error') {
     level = 'error';
   }
-  // eslint-disable-next-line fp/no-arguments
+  // eslint-disable-next-line fp/no-arguments, prefer-rest-params
   if (event === 'exit' && arguments[0] !== 0) {
     level = 'error';
   }
@@ -196,7 +196,7 @@ let mainMaster = function() {
   if (env.isProd) {
     process.stdin.resume();
     process.stdin.on('close', function() {
-      // eslint-disable-next-line fp/no-arguments
+      // eslint-disable-next-line fp/no-arguments, prefer-rest-params
       _.curry(onSimpleEvent)('stdin_close')(arguments);
       // eslint-disable-next-line no-process-exit
       process.exit(0);
